@@ -151,7 +151,12 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
         },
         body: JSON.stringify(formData)
     })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) { // If the status is not 200-299, throw an error
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(() => {
             fetchCertificates();
             document.getElementById('certificateModal').style.display = 'none';
@@ -159,8 +164,10 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
         })
         .catch(error => {
             console.error('Error:', error);
+            document.getElementById('certificateModal').style.display = 'none';
             showMessage('An error occurred. Please try again.', true);
         });
+
 });
 
 // Edit certificate
