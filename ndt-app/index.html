@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>Certificate Management System</h1>
+    </header>
+
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection" class="card">
+            <h2 style="text-align: center;">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">Log In</button>
+            </form>
+            <div id="errorMessage"></div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <button id="logoutBtn">Logout</button>
+            <div class="card">
+                <h2>Certificates</h2>
+                <button id="addCertificateBtn">Add New Certificate</button>
+                <div id="certificateTable"></div>
+            </div>
+        </div>
+
+        <!-- Certificate Form Modal -->
+        <div id="certificateModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="formTitle">Add New Certificate</h2>
+                <form id="certificateForm">
+                    <div class="form-group">
+                        <label for="inspectorNumber">Inspector Number:</label>
+                        <input type="number" id="inspectorNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rollNumber">Roll Number:</label>
+                        <input type="number" id="rollNumber" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="inspectorName">Inspector Name:</label>
+                        <input type="text" id="inspectorName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fatherName">Father Name:</label>
+                        <input type="text" id="fatherName" required>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="radiographicTesting"> Radiographic Testing Level II
+                        </label>
+                        <label>
+                            <input type="checkbox" id="ultrasonicTesting"> Ultrasonic Testing Level II
+                        </label>
+                        <label>
+                            <input type="checkbox" id="visualTesting"> Visual Testing Level II
+                        </label>
+                        <label>
+                            <input type="checkbox" id="liquidPenetrantTesting"> Liquid Penetrant Testing Level II
+                        </label>
+                        <label>
+                            <input type="checkbox" id="magneticParticleTesting"> Magnetic Particle Testing Level II
+                        </label>
+                    </div>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Certificate Details Modal -->
+        <div id="detailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Certificate Details</h2>
+                <div id="certificateDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
