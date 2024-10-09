@@ -1,0 +1,365 @@
+.header-top {
+    background-color: #f8f8f8;
+    padding: 10px 0;
+}
+
+.header-top-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo img {
+    max-width: 100px;
+}
+
+.contact-info {
+    display: flex;
+    border-color: #9989894f;
+    gap: 30px;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 8px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.contact-icon {
+    width: 30px;
+    height: 30px;
+    background-color: #007bff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+}
+
+.contact-text h4 {
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+.contact-text p {
+    font-size: 14px;
+    color: #666;
+}
+
+.main-nav {
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 0;
+}
+
+.main-nav>.container {
+    background-color: #333;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.menu {
+    list-style-type: none;
+    display: flex;
+    gap: 20px;
+}
+
+.menu li a {
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+    transition: color 0.3s ease;
+}
+
+.menu li a:hover {
+    color: #007bff;
+}
+
+.dropdown,
+.dropdowne {
+    position: relative;
+}
+
+.dropdown-content,
+.dropdown-contente {
+    display: none;
+    position: absolute;
+    background-color: #333;
+    min-width: 350px;
+    box-shadow: 0px 8px 16px 0px rgba(148, 148, 148, 0.692);
+    transform: translateX(-25%);
+    z-index: 100000000;
+}
+
+.dropdown-contente {
+    transform: translate(100%, -25%);
+    z-index: 1000000000;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content,
+.dropdown-content a.dropdowne:hover+.dropdown-contente {
+    display: block;
+}
+
+.search-form {
+    display: flex;
+}
+
+.search-input {
+    padding: 8px;
+    border: none;
+
+    border-radius: 4px 0 0 4px;
+}
+
+.search-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 0 4px 4px 0;
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .header-top-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .contact-info {
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .nav-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .menu {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .menu.active {
+        display: flex;
+    }
+
+    .mobile-menu-toggle {
+        display: block;
+        align-self: flex-end;
+    }
+
+    .search-form {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .search-input {
+        flex-grow: 1;
+    }
+}
+
+h2 {
+
+    color: white;
+}
+
+.slider-wrapper {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh;
+    font-family: 'Titillium Web', 'Open Sans', Arial, sans-serif;
+    line-height: 1.6;
+    margin-bottom: 50px;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    display: flex;
+    align-items: center;
+
+    padding: 0 5%;
+    background-size: cover;
+    background-position: center;
+}
+
+.slide.active {
+    opacity: 1;
+}
+
+.slide-content {
+    max-width: 600px;
+    color: #fff;
+
+}
+
+.slide-title {
+    font-size: 4rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.slide-description {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    transition-delay: 0.2s;
+}
+
+.slide-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 5px;
+    transition: background-color 0.3s ease-in-out;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out, background-color 0.3s ease-in-out;
+    transition-delay: 0.4s;
+}
+
+.slide-btn:hover {
+    background-color: #e35210;
+}
+
+.slide.active .slide-title,
+.slide.active .slide-description,
+.slide.active .slide-btn {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+}
+
+.slider-nav {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+}
+
+.slider-nav-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.slider-nav-btn.active {
+    background-color: #fff;
+}
+
+@media (max-width: 768px) {
+    .slide-content {
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    .slide-title {
+        font-size: 2.5rem;
+    }
+
+    .slide-description {
+        font-size: 1rem;
+    }
+}
+
+.row {
+    display: flex;
+    align-items: flex-start;
+    /* Aligns content at the start */
+}
+
+.column {
+    flex: 1;
+    /* Makes each column flexible */
+}
+
+img {
+    max-width: 100%;
+    /* Ensures images are responsive */
+    height: auto;
+    /* Maintains aspect ratio */
+}
+
+.read-more {
+    background-color: transparent;
+    /* No background */
+    border: none;
+    /* No border */
+    cursor: pointer;
+    /* Cursor pointer for hover */
+    font-weight: bold;
+    /* Bold text */
+    color: #007BFF;
+    /* Change to desired color */
+}
+
+.ccontent-inner {
+    display: grid;
+    gap: 30px;
+    margin-bottom: 30px;
+}
