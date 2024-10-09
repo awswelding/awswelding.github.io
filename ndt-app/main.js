@@ -124,9 +124,11 @@ document.getElementById('addCertificateBtn').addEventListener('click', () => {
     document.getElementById('certificateModal').style.display = 'block';
 });
 
+
 // Handle form submission
 document.getElementById('certificateForm').addEventListener('submit', (e) => {
     e.preventDefault();
+    document.getElementById('sbmtbtn').style.display = 'none';
     const formData = {
         inspectorNumber: parseInt(document.getElementById('inspectorNumber').value),
         roll_number: parseInt(document.getElementById('rollNumber').value),
@@ -160,11 +162,12 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
         .then(() => {
             fetchCertificates();
             document.getElementById('certificateModal').style.display = 'none';
+            document.getElementById('sbmtbtn').style.display = 'block';
             showMessage(isEditing ? 'Certificate updated successfully!' : 'Certificate added successfully!');
         })
         .catch(error => {
             console.error('Error:', error);
-
+            document.getElementById('sbmtbtn').style.display = 'block';
             showMessage('An error occurred. Please try again.', true);
         });
 
