@@ -164,7 +164,7 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
         })
         .catch(error => {
             console.error('Error:', error);
-            document.getElementById('certificateModal').style.display = 'none';
+
             showMessage('An error occurred. Please try again.', true);
         });
 
@@ -175,7 +175,7 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
 function editCertificate(id) {
     isEditing = true;
     const certificate = certificates.find(cert => cert.inspectorNumber === id);
-    editingId = objectIdToString(certificate.id);
+    editingId = id
 
 
     document.getElementById('formTitle').textContent = 'Edit Certificate';
@@ -194,7 +194,7 @@ function editCertificate(id) {
 // Delete certificate
 function deleteCertificate(id) {
 
-    var delid = objectIdToString(certificates.find(cert => cert.inspectorNumber === id).id)
+    var delid = id
 
     if (confirm('Are you sure you want to delete this certificate?')) {
         fetch(`${API_URL}/api/Items/${delid}`, {

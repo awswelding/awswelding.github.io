@@ -109,17 +109,41 @@ input[type="password"] {
 
 #loginSection,
 #dashboardSection {
+    max-width: 100%;
+    min-width: fit-content;
     display: none;
 }
 
-#errorMessage {
-    color: var(--error-color);
-    margin-top: 10px;
+.success-message {
+
+
+    color: var(--success-color);
+
 }
 
-.success-message {
-    color: var(--success-color);
+.error-message {
+
+    color: var(--error-color);
+
+
+}
+
+.success-message,
+.error-message {
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 10000000;
+    position: fixed;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 50px;
     margin-top: 10px;
+    top: 10px;
+    left: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
 }
 
 .action-buttons {
