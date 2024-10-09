@@ -4109,37 +4109,10 @@
 	</style>
 
 	<style>
-		#result {
-			background-color: #f0f0f0;
-			padding: 20px;
-			border-radius: 5px;
-
-		}
-
 		.hidden {
 			display: none;
 		}
 
-		.certificate-detail {
-			margin-bottom: 10px;
-		}
-
-		.certificate-detail strong {
-			display: inline-block;
-			width: 300px;
-		}
-
-		.check {
-			font-weight: bold;
-			font-size: 25px;
-			color: green;
-		}
-
-		.cross {
-			font-weight: bold;
-			font-size: 25px;
-			color: red;
-		}
 
 
 
@@ -4177,22 +4150,7 @@
 			padding: 5px 10px;
 		}
 
-		table {
-			width: 100%;
-			border-collapse: collapse;
-		}
 
-		th,
-		td {
-			padding: 10px;
-			border: 1px solid #b3d9ff;
-			text-align: left;
-		}
-
-		th {
-			background-color: #d4e6ff;
-			font-weight: bold;
-		}
 
 		.hidden {
 			display: none;
@@ -4259,22 +4217,7 @@
 			padding: 5px 10px;
 		}
 
-		table {
-			width: 100%;
-			border-collapse: collapse;
-		}
 
-		th,
-		td {
-			padding: 10px;
-			border: 1px solid #b3d9ff;
-			text-align: left;
-		}
-
-		th {
-			background-color: #d4e6ff;
-			font-weight: bold;
-		}
 
 		.hidden {
 			display: none;
@@ -4304,6 +4247,44 @@
 			100% {
 				transform: rotate(360deg);
 			}
+		}
+
+
+
+		#resultTable {
+			display: grid;
+			padding: 15px;
+			color: black !important;
+			gap: 7px;
+
+		}
+
+		.roww {
+			display: grid;
+			gap: 10px;
+		}
+
+		.value {
+			padding: 5px;
+			border: 1px solid #97909063;
+		}
+
+		@media only screen and (min-width: 700px) {
+			.roww {
+				display: grid;
+
+				justify-content: space-between;
+				grid-template-columns: 45% 45%;
+			}
+		}
+
+		.mcont {
+			margin-top: 100px;
+		}
+
+		.clear {
+			clear: both;
+			margin-bottom: 250px;
 		}
 	</style>
 
@@ -4327,12 +4308,12 @@
 								<img src="/wp-content/uploads/2023/07/logo-1.png" alt="AWS Welding Services">
 							</div>
 							<div class="contact-info">
-								<a href="tel:+201029104142">
+								<a href="tel:00201029104142">
 									<div class="contact-item">
 										<div class="contact-icon">📞</div>
 										<div class="contact-text">
 											<h4>Call</h4>
-											<p>+201029104142</p>
+											<p>00201029104142</p>
 										</div>
 									</div>
 								</a>
@@ -4465,7 +4446,7 @@
 
 
 												<div>
-													<div class="result_div">
+													<div class="mcont">
 														<div class="ffcontainer">
 															<div class="fcontainer">
 																<h1>Online Result System</h1>
@@ -4480,49 +4461,59 @@
 																	<p>Loading results...</p>
 																</div>
 																<div id="result" class="hidden">
-																	<table id="resultTable">
-																		<tr>
-																			<th>Inspector Number:</th>
-																			<td id="inspectorNumberResult"></td>
-																		</tr>
-																		<tr>
-																			<th>Roll No:</th>
-																			<td id="rollNumber"></td>
-																		</tr>
-																		<tr>
-																			<th>Inspector Name:</th>
-																			<td id="inspectorName"></td>
-																		</tr>
-																		<tr>
-																			<th>Fathers Name:</th>
-																			<td id="fatherName"></td>
-																		</tr>
-																		<tr id="liquidPenetrantRow" class="hidden">
-																			<th>NDT Method & Qualification Level:</th>
-																			<td id="liquidPenetrant"></td>
-																		</tr>
-																		<tr id="magneticParticleRow" class="hidden">
-																			<th>NDT Method & Qualification Level:</th>
-																			<td id="magneticParticle"></td>
-																		</tr>
-																		<tr id="radiographicRow" class="hidden">
-																			<th>NDT Method & Qualification Level:</th>
-																			<td id="radiographic"></td>
-																		</tr>
-																		<tr id="ultrasonicRow" class="hidden">
-																			<th>NDT Method & Qualification Level:</th>
-																			<td id="ultrasonic"></td>
-																		</tr>
-																		<tr id="visualRow" class="hidden">
-																			<th>NDT Method & Qualification Level:</th>
-																			<td id="visual"></td>
-																		</tr>
-																	</table>
+																	<div id="resultTable">
+																		<div class="roww">
+																			<div class="labell">Inspector Number:</div>
+																			<div class="value"
+																				id="inspectorNumberResult"></div>
+																		</div>
+																		<div class="roww">
+																			<div class="labell">Roll No:</div>
+																			<div class="value" id="rollNumber"></div>
+																		</div>
+																		<div class="roww">
+																			<div class="labell">Inspector Name:</div>
+																			<div class="value" id="inspectorName"></div>
+																		</div>
+																		<div class="roww">
+																			<div class="labell">Fathers Name:</div>
+																			<div class="value" id="fatherName"></div>
+																		</div>
+																		<div class="roww hidden"
+																			id="liquidPenetrantRow">
+																			<div class="labell">NDT Method &
+																				Qualification Level:</div>
+																			<div class="value" id="liquidPenetrant">
+																			</div>
+																		</div>
+																		<div class="roww hidden"
+																			id="magneticParticleRow">
+																			<div class="labell">NDT Method &
+																				Qualification Level:</div>
+																			<div class="value" id="magneticParticle">
+																			</div>
+																		</div>
+																		<div class="roww hidden" id="radiographicRow">
+																			<div class="labell">NDT Method &
+																				Qualification Level:</div>
+																			<div class="value" id="radiographic"></div>
+																		</div>
+																		<div class="roww hidden" id="ultrasonicRow">
+																			<div class="labell">NDT Method &
+																				Qualification Level:</div>
+																			<div class="value" id="ultrasonic"></div>
+																		</div>
+																		<div class="roww hidden" id="visualRow">
+																			<div class="labell">NDT Method &
+																				Qualification Level:</div>
+																			<div class="value" id="visual"></div>
+																		</div>
+																	</div>
 																</div>
 																<div id="error" class="hidden"></div>
 															</div>
 														</div>
-
+														<div class="clear"></div>
 													</div><!-- result_div -->
 
 												</div>
