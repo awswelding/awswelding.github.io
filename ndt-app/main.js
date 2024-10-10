@@ -1,4 +1,4 @@
-const API_URL = 'https://abdoabudeiff.somee.com'; // Replace with your actual API URL
+const API_URL = 'https://awswelding.runasp.net'; // Replace with your actual API URL
 
 let certificates = [];
 let isEditing = false;
