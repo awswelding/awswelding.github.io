@@ -1,61 +1,32 @@
-.header-top {
-    background-color: #f8f8f8;
-    padding: 10px 0;
-}
-
-.header-top-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .logo img {
     max-width: 100px;
 }
 
 .contact-info {
-    display: flex;
-    border-color: #9989894f;
-    gap: 30px;
     font-weight: bold;
-    border-radius: 10px;
-    padding: 8px;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    -ms-border-radius: 10px;
-    -o-border-radius: 10px;
+    font-size: 1.5rem;
 }
 
-.contact-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.contact-info a {
+    text-decoration: none;
+    color: inherit;
 }
 
-.contact-icon {
-    width: 30px;
-    height: 30px;
-    background-color: #007bff;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
-    -ms-border-radius: 50%;
-    -o-border-radius: 50%;
+@media (max-width: 992px) {
+    .contact-info {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
 }
 
-.contact-text h4 {
-    font-size: 12px;
-    margin-bottom: 2px;
-}
 
-.contact-text p {
-    font-size: 14px;
-    color: #666;
-}
+
+
+
+
+
+
+
 
 .main-nav {
     background-color: #333;
@@ -133,25 +104,6 @@
     display: block;
 }
 
-.search-form {
-    display: flex;
-}
-
-.search-input {
-    padding: 8px;
-    border: none;
-
-    border-radius: 4px 0 0 4px;
-}
-
-.search-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    cursor: pointer;
-    border-radius: 0 4px 4px 0;
-}
 
 .mobile-menu-toggle {
     display: none;
@@ -195,15 +147,14 @@
         align-self: flex-end;
     }
 
-    .search-form {
-        width: 100%;
-        margin-top: 15px;
-    }
 
-    .search-input {
-        flex-grow: 1;
-    }
 }
+
+
+
+
+
+
 
 h2 {
 
@@ -354,7 +305,7 @@ img {
     /* Cursor pointer for hover */
     font-weight: bold;
     /* Bold text */
-    color: #007BFF;
+    color: #007bff;
     /* Change to desired color */
 }
 
