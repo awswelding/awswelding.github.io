@@ -236,7 +236,7 @@ function showDetails(id) {
         <p><strong>Father Name:</strong> ${certificate.fatherName}</p>
         <p><strong>Radiographic Testing Level II:</strong> ${certificate.radiographic_testing_level_II ? 'Yes' : 'No'}</p>
         <p><strong>Ultrasonic Testing Level II:</strong> ${certificate.ultrasonic_testing_level_II ? 'Yes' : 'No'}</p>
-        <p><strong>Ultrasonic Phased Array Level II:</strong> ${certificate.ultrasonic_phased_array_level_II ? 'Yes' : 'No'}</p>
+        <p><strong>UT "Phased Array":</strong> ${certificate.ultrasonic_phased_array_level_II ? 'Yes' : 'No'}</p>
         <p><strong>Visual Testing Level II:</strong> ${certificate.visual_testing_level_II ? 'Yes' : 'No'}</p>
         <p><strong>Liquid Penetrant Testing Level II:</strong> ${certificate.liquid_penetrant_testing_level_II ? 'Yes' : 'No'}</p>
         <p><strong>Magnetic Particle Testing Level II:</strong> ${certificate.magnetic_particle_testing_level_II ? 'Yes' : 'No'}</p>
