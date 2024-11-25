@@ -136,7 +136,7 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
         fatherName: document.getElementById('fatherName').value,
         radiographic_testing_level_II: document.getElementById('radiographicTesting').checked,
         ultrasonic_testing_level_II: document.getElementById('ultrasonicTesting').checked,
-        ultrasonic_phased_array_level_II: document.getElementById('ultrasonicPhasedArray').checked,
+        ultrasonic_Phased_Array_Level_II: document.getElementById('ultrasonicPhasedArray').checked,
         visual_testing_level_II: document.getElementById('visualTesting').checked,
         liquid_penetrant_testing_level_II: document.getElementById('liquidPenetrantTesting').checked,
         magnetic_particle_testing_level_II: document.getElementById('magneticParticleTesting').checked
@@ -193,7 +193,8 @@ function editCertificate(id) {
     document.getElementById('visualTesting').checked = certificate.visual_testing_level_II;
     document.getElementById('liquidPenetrantTesting').checked = certificate.liquid_penetrant_testing_level_II;
     document.getElementById('magneticParticleTesting').checked = certificate.magnetic_particle_testing_level_II;
-    document.getElementById('ultrasonicPhasedArray').checked = certificate.ultrasonic_phased_array_level_II;
+    document.getElementById('ultrasonicPhasedArray').checked = certificate.ultrasonic_Phased_Array_Level_II;
+
     document.getElementById('certificateModal').style.display = 'block';
 }
 
@@ -236,7 +237,7 @@ function showDetails(id) {
         <p><strong>Father Name:</strong> ${certificate.fatherName}</p>
         <p><strong>Radiographic Testing Level II:</strong> ${certificate.radiographic_testing_level_II ? 'Yes' : 'No'}</p>
         <p><strong>Ultrasonic Testing Level II:</strong> ${certificate.ultrasonic_testing_level_II ? 'Yes' : 'No'}</p>
-        <p><strong>UT "Phased Array":</strong> ${certificate.ultrasonic_phased_array_level_II ? 'Yes' : 'No'}</p>
+        <p><strong>UT "Phased Array":</strong> ${certificate.ultrasonic_Phased_Array_Level_II ? 'Yes' : 'No'}</p>
         <p><strong>Visual Testing Level II:</strong> ${certificate.visual_testing_level_II ? 'Yes' : 'No'}</p>
         <p><strong>Liquid Penetrant Testing Level II:</strong> ${certificate.liquid_penetrant_testing_level_II ? 'Yes' : 'No'}</p>
         <p><strong>Magnetic Particle Testing Level II:</strong> ${certificate.magnetic_particle_testing_level_II ? 'Yes' : 'No'}</p>
