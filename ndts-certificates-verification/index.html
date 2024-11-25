@@ -4461,8 +4461,6 @@
 
 
 											<div class="container">
-
-
 												<div>
 													<div class="mcont">
 														<div class="ffcontainer">
@@ -4521,6 +4519,13 @@
 																				Qualification Level:</div>
 																			<div class="value" id="ultrasonic"></div>
 																		</div>
+																		<div class="roww hidden"
+																			id="ultrasonicPhasedArrayRow">
+																			<div class="labell">NDT Method &
+																				Qualification Level:</div>
+																			<div class="value"
+																				id="ultrasonicPhasedArray"></div>
+																		</div>
 																		<div class="roww hidden" id="visualRow">
 																			<div class="labell">NDT Method &
 																				Qualification Level:</div>
@@ -4532,8 +4537,7 @@
 															</div>
 														</div>
 														<div class="clear"></div>
-													</div><!-- result_div -->
-
+													</div>
 												</div>
 											</div>
 										</section>
@@ -4675,6 +4679,7 @@
 					{ id: 'magneticParticle', field: 'magnetic_particle_testing_level_II', text: "Magnetic Particle Testing Level II" },
 					{ id: 'radiographic', field: 'radiographic_testing_level_II', text: "Radiographic Testing Level II" },
 					{ id: 'ultrasonic', field: 'ultrasonic_testing_level_II', text: "Ultrasonic Testing Level II" },
+					{ id: 'ultrasonicPhasedArray', field: 'ultrasonic_phased_array_level_II', text: "Ultrasonic Phased Array Level II" },
 					{ id: 'visual', field: 'visual_testing_level_II', text: "Visual Testing Level II" }
 				];
 
@@ -4698,7 +4703,6 @@
 				errorDiv.classList.remove('hidden');
 			}
 		});
-
 	</script>
 
 
