@@ -206,3 +206,37 @@ input[type="password"] {
     text-decoration: none;
     cursor: pointer;
 }
+
+
+/* Add these styles to your existing CSS */
+.tab-navigation {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: #b8b6b6;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 0;
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    -ms-border-radius: 0;
+    -o-border-radius: 0;
+}
+
+.tab-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}

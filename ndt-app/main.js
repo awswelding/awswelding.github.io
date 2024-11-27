@@ -1,8 +1,11 @@
 const API_URL = 'https://awswelding.runasp.net'; // Replace with your actual API URL
 
 let certificates = [];
-let isEditing = false;
-let editingId = null;
+let courses = [];
+let isEditingCertificate = false;
+let isEditingCourse = false;
+let editingCertificateId = null;
+let editingCourseId = null;
 let username, password;
 
 // Show login or dashboard based on session storage
@@ -245,6 +248,177 @@ function showDetails(id) {
     document.getElementById('certificateDetails').innerHTML = detailsHtml;
     document.getElementById('detailsModal').style.display = 'block';
 }
+
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove active class from all buttons and tabs
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+        // Add active class to clicked button and corresponding tab
+        btn.classList.add('active');
+        document.getElementById(`${btn.dataset.tab}Tab`).classList.add('active');
+
+        // Fetch data for the selected tab
+        if (btn.dataset.tab === 'courses') {
+            fetchCourses();
+        }
+    });
+});
+
+// Fetch Courses
+function fetchCourses() {
+    fetch(`${API_URL}/api/Certificate/all`, {
+        headers: {
+            'username': username,
+            'password': password
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            courses = data;
+            renderCoursesTable();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Render Courses Table
+function renderCoursesTable() {
+    const tableHtml = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Certificate ID</th>
+                    <th>Name</th>
+                    <th>Course Title</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${courses.map(course => `
+                    <tr>
+                        <td>${course.certificateID}</td>
+                        <td>${course.name || 'N/A'}</td>
+                        <td>${course.courseTitle || 'N/A'}</td>
+                        <td class="action-buttons">
+                            <button class="edit-btn" onclick="editCourse(${course.certificateID})">Edit</button>
+                            <button class="delete-btn" onclick="deleteCourse(${course.certificateID})">Delete</button>
+                            <button class="details-btn" onclick="showCourseDetails(${course.certificateID})">Details</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    document.getElementById('courseTable').innerHTML = tableHtml;
+}
+
+// Add New Course Button
+document.getElementById('addCourseBtn').addEventListener('click', () => {
+    isEditingCourse = false;
+    editingCourseId = null;
+    document.getElementById('courseFormTitle').textContent = 'Add New Course';
+    document.getElementById('courseForm').reset();
+    document.getElementById('courseModal').style.display = 'block';
+});
+
+// Course Form Submission
+document.getElementById('courseForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.getElementById('courseSbmtBtn').style.display = 'none';
+
+    const formData = {
+        certificateID: parseInt(document.getElementById('certificateID').value),
+        name: document.getElementById('courseName').value,
+        courseTitle: document.getElementById('courseTitle').value
+    };
+
+    const url = isEditingCourse
+        ? `${API_URL}/api/Certificate/${editingCourseId}`
+        : `${API_URL}/api/Certificate`;
+    const method = isEditingCourse ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'username': username,
+            'password': password
+        },
+        body: JSON.stringify(formData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(() => {
+            fetchCourses();
+            document.getElementById('courseModal').style.display = 'none';
+            document.getElementById('courseSbmtBtn').style.display = 'block';
+            showMessage(isEditingCourse ? 'Course updated successfully!' : 'Course added successfully!');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('courseSbmtBtn').style.display = 'block';
+            showMessage('An error occurred. Please try again.', true);
+        });
+});
+
+// Edit Course
+function editCourse(id) {
+    isEditingCourse = true;
+    editingCourseId = id;
+    const course = courses.find(c => c.certificateID === id);
+
+    document.getElementById('courseFormTitle').textContent = 'Edit Course';
+    document.getElementById('certificateID').value = course.certificateID;
+    document.getElementById('courseName').value = course.name || '';
+    document.getElementById('courseTitle').value = course.courseTitle || '';
+
+    document.getElementById('courseModal').style.display = 'block';
+}
+
+// Delete Course
+function deleteCourse(id) {
+    if (confirm('Are you sure you want to delete this course?')) {
+        fetch(`${API_URL}/api/Certificate/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'username': username,
+                'password': password
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    fetchCourses();
+                    showMessage('Course deleted successfully!');
+                } else {
+                    throw new Error('Failed to delete course');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred while deleting the course.', true);
+            });
+    }
+}
+
+// Show Course Details
+function showCourseDetails(id) {
+    const course = courses.find(c => c.certificateID === id);
+
+    const detailsHtml = `
+        <p><strong>Certificate ID:</strong> ${course.certificateID}</p>
+        <p><strong>Name:</strong> ${course.name || 'N/A'}</p>
+        <p><strong>Course Title:</strong> ${course.courseTitle || 'N/A'}</p>
+    `;
+    document.getElementById('courseDetails').innerHTML = detailsHtml;
+    document.getElementById('courseDetailsModal').style.display = 'block';
+}
+
 
 // Show message function
 function showMessage(message, isError = false) {

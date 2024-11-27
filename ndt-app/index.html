@@ -7,9 +7,6 @@
     <title>Certificate Management System</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
-
-
 </head>
 
 <body>
@@ -18,7 +15,7 @@
     </div>
 
     <div class="container">
-        <!-- Login Section -->
+        <!-- Login Section (unchanged) -->
         <div id="loginSection" class="card">
             <h2 style="text-align: center;">Login</h2>
             <form id="loginForm">
@@ -38,14 +35,32 @@
         <!-- Dashboard Section -->
         <div id="dashboardSection">
             <button id="logoutBtn">Logout</button>
-            <div class="card">
-                <h2>Certificates</h2>
-                <button id="addCertificateBtn">Add New Certificate</button>
-                <div id="certificateTable"></div>
+
+            <!-- Navigation Tabs -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="certificates">Certificates</button>
+                <button class="tab-btn" data-tab="courses">Courses</button>
+            </div>
+
+            <!-- Certificates Tab -->
+            <div id="certificatesTab" class="tab-content active">
+                <div class="card">
+                    <h2>Certificates</h2>
+                    <button id="addCertificateBtn">Add New Certificate</button>
+                    <div id="certificateTable"></div>
+                </div>
+            </div>
+
+            <!-- Courses Tab -->
+            <div id="coursesTab" class="tab-content">
+                <div class="card">
+                    <h2>Courses</h2>
+                    <button id="addCourseBtn">Add New Course</button>
+                    <div id="courseTable"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Certificate Form Modal -->
         <div id="certificateModal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -103,10 +118,40 @@
         </div>
     </div>
 
+    <!-- Course Form Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="courseFormTitle">Add New Course</h2>
+            <form id="courseForm">
+                <div class="form-group">
+                    <label for="certificateID">Certificate ID:</label>
+                    <input type="number" id="certificateID" required>
+                </div>
+                <div class="form-group">
+                    <label for="courseName">Name:</label>
+                    <input type="text" id="courseName" required>
+                </div>
+                <div class="form-group">
+                    <label for="courseTitle">Course Title:</label>
+                    <input type="text" id="courseTitle" required>
+                </div>
+                <button id="courseSbmtBtn" type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course Details Modal -->
+    <div id="courseDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Course Details</h2>
+            <div id="courseDetails"></div>
+        </div>
+    </div>
+    </div>
+
     <script src="main.js"></script>
-
-
-
 </body>
 
 </html>
