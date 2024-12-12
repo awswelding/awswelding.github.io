@@ -84,24 +84,42 @@
                     </div>
                     <!-- Inside the checkbox-group div, add this new checkbox -->
                     <div class="form-group checkbox-group">
-                        <label>
-                            <input type="checkbox" id="radiographicTesting"> Radiographic Testing Level II
-                        </label>
-                        <label>
-                            <input type="checkbox" id="ultrasonicTesting"> Ultrasonic Testing Level II
-                        </label>
-                        <label>
-                            <input type="checkbox" id="ultrasonicPhasedArray"> UT "Phased Array"
-                        </label>
-                        <label>
-                            <input type="checkbox" id="visualTesting"> Visual Testing Level II
-                        </label>
-                        <label>
-                            <input type="checkbox" id="liquidPenetrantTesting"> Liquid Penetrant Testing Level II
-                        </label>
-                        <label>
-                            <input type="checkbox" id="magneticParticleTesting"> Magnetic Particle Testing Level II
-                        </label>
+                        <div class="certification-item">
+                            <label>
+                                <input type="checkbox" id="radiographicTesting"> Radiographic Testing Level II
+                            </label>
+                            <input type="date" id="radiographicTestingExp" class="exp-date">
+                        </div>
+                        <div class="certification-item">
+                            <label>
+                                <input type="checkbox" id="ultrasonicTesting"> Ultrasonic Testing Level II
+                            </label>
+                            <input type="date" id="ultrasonicTestingExp" class="exp-date">
+                        </div>
+                        <div class="certification-item">
+                            <label>
+                                <input type="checkbox" id="ultrasonicPhasedArray"> UT "Phased Array"
+                            </label>
+                            <input type="date" id="ultrasonicPhasedArrayExp" class="exp-date">
+                        </div>
+                        <div class="certification-item">
+                            <label>
+                                <input type="checkbox" id="visualTesting"> Visual Testing Level II
+                            </label>
+                            <input type="date" id="visualTestingExp" class="exp-date">
+                        </div>
+                        <div class="certification-item">
+                            <label>
+                                <input type="checkbox" id="liquidPenetrantTesting"> Liquid Penetrant Testing Level II
+                            </label>
+                            <input type="date" id="liquidPenetrantTestingExp" class="exp-date">
+                        </div>
+                        <div class="certification-item">
+                            <label>
+                                <input type="checkbox" id="magneticParticleTesting"> Magnetic Particle Testing Level II
+                            </label>
+                            <input type="date" id="magneticParticleTestingExp" class="exp-date">
+                        </div>
                     </div>
                     <button id="sbmtbtn" type="submit">Submit</button>
                 </form>

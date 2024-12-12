@@ -4288,6 +4288,45 @@
 			clear: both;
 			margin-bottom: 250px;
 		}
+
+		/* Add these styles to your existing CSS */
+		.cert-info {
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+		}
+
+		.cert-name {
+			font-weight: bold;
+			color: #2c3e50;
+		}
+
+		.cert-expiry {
+			font-size: 0.9em;
+			color: #7f8c8d;
+		}
+
+		/* Update the existing value class */
+		.value {
+			padding: 10px;
+			border: 1px solid #97909063;
+			background-color: #fff;
+		}
+
+		/* Make the display more compact on mobile */
+		@media only screen and (max-width: 699px) {
+			.cert-info {
+				gap: 2px;
+			}
+
+			.cert-expiry {
+				font-size: 0.85em;
+			}
+
+			.value {
+				padding: 8px;
+			}
+		}
 	</style>
 
 
@@ -4654,6 +4693,8 @@
 	</script>
 
 	<script>
+
+
 		document.getElementById('searchForm').addEventListener('submit', async function (e) {
 			e.preventDefault();
 			const inspectorNumber = document.getElementById('inspectorNumber').value;
@@ -4669,25 +4710,64 @@
 				const response = await axios.get(`https://awswelding.runasp.net/api/Items/inspector/${inspectorNumber}`);
 				const certificate = response.data;
 
+				// Display basic information
 				document.getElementById('inspectorNumberResult').textContent = certificate.inspectorNumber;
 				document.getElementById('rollNumber').textContent = certificate.roll_number;
 				document.getElementById('inspectorName').textContent = certificate.inspectorName;
 				document.getElementById('fatherName').textContent = certificate.fatherName;
 
+				const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not set';
+
 				const ndtMethods = [
-					{ id: 'liquidPenetrant', field: 'liquid_penetrant_testing_level_II', text: "Liquid Penetrant Testing Level II" },
-					{ id: 'magneticParticle', field: 'magnetic_particle_testing_level_II', text: "Magnetic Particle Testing Level II" },
-					{ id: 'radiographic', field: 'radiographic_testing_level_II', text: "Radiographic Testing Level II" },
-					{ id: 'ultrasonic', field: 'ultrasonic_testing_level_II', text: "Ultrasonic Testing Level II" },
-					{ id: 'ultrasonicPhasedArray', field: 'ultrasonic_Phased_Array_Level_II', text: 'UT "Phased Array"' },
-					{ id: 'visual', field: 'visual_testing_level_II', text: "Visual Testing Level II" }
+					{
+						id: 'liquidPenetrant',
+						field: 'liquid_penetrant_testing_level_II',
+						expField: 'liquid_penetrant_testing_level_II_ExpDate',
+						text: "Liquid Penetrant Testing Level II"
+					},
+					{
+						id: 'magneticParticle',
+						field: 'magnetic_particle_testing_level_II',
+						expField: 'magnetic_particle_testing_level_II_ExpDate',
+						text: "Magnetic Particle Testing Level II"
+					},
+					{
+						id: 'radiographic',
+						field: 'radiographic_testing_level_II',
+						expField: 'radiographic_testing_level_II_ExpDate',
+						text: "Radiographic Testing Level II"
+					},
+					{
+						id: 'ultrasonic',
+						field: 'ultrasonic_testing_level_II',
+						expField: 'ultrasonic_testing_level_II_ExpDate',
+						text: "Ultrasonic Testing Level II"
+					},
+					{
+						id: 'ultrasonicPhasedArray',
+						field: 'ultrasonic_Phased_Array_Level_II',
+						expField: 'ultrasonic_Phased_Array_Level_II_ExpDate',
+						text: 'UT "Phased Array"'
+					},
+					{
+						id: 'visual',
+						field: 'visual_testing_level_II',
+						expField: 'visual_testing_level_II_ExpDate',
+						text: "Visual Testing Level II"
+					}
 				];
 
 				ndtMethods.forEach(method => {
 					const row = document.getElementById(`${method.id}Row`);
 					const cell = document.getElementById(method.id);
 					if (certificate[method.field]) {
-						cell.textContent = method.text;
+						const expDate = formatDate(certificate[method.expField]);
+						cell.innerHTML = `
+                    <div class="cert-info">
+                        <div class="cert-name">${method.text}</div>
+                        <div class="cert-expiry">Expires: ${expDate}</div>
+                    </div>
+                `;
 						row.classList.remove('hidden');
 					} else {
 						row.classList.add('hidden');
@@ -4703,6 +4783,8 @@
 				errorDiv.classList.remove('hidden');
 			}
 		});
+
+
 	</script>
 
 

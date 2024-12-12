@@ -240,3 +240,105 @@ input[type="password"] {
 .tab-content.active {
     display: block;
 }
+
+/* Add these styles to your style.css file */
+.certification-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.certification-item label {
+    min-width: 250px;
+}
+
+.exp-date {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.exp-date:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+
+/* Add these styles to your style.css file */
+
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.details-table th,
+.details-table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.details-table th {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+}
+
+.details-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.cert-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-indicator {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.status-indicator.Yes {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-indicator.No {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.exp-date {
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Adjust modal content for the table */
+.modal-content {
+    /* max-width: 800px; */
+    /* Increased width for better table display */
+    width: 90%;
+    margin: 5% auto;
+    /* Adjusted margin for better positioning */
+}
+
+/* Make the table responsive */
+@media screen and (max-width: 768px) {
+    .details-table td {
+        padding: 8px;
+        font-size: 0.9em;
+    }
+
+    .cert-status {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}

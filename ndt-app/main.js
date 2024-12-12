@@ -125,24 +125,57 @@ document.getElementById('addCertificateBtn').addEventListener('click', () => {
     document.getElementById('formTitle').textContent = 'Add New Certificate';
     document.getElementById('certificateForm').reset();
     document.getElementById('certificateModal').style.display = 'block';
+    setupCertificationCheckboxes();
 });
 
+function setupCertificationCheckboxes() {
+    const certifications = [
+        'radiographicTesting',
+        'ultrasonicTesting',
+        'ultrasonicPhasedArray',
+        'visualTesting',
+        'liquidPenetrantTesting',
+        'magneticParticleTesting'
+    ];
+
+    certifications.forEach(cert => {
+        const checkbox = document.getElementById(cert);
+        const expDate = document.getElementById(`${cert}Exp`);
+
+        checkbox.addEventListener('change', () => {
+            expDate.disabled = !checkbox.checked;
+            if (!checkbox.checked) {
+                expDate.value = '';
+            }
+        });
+
+        // Initial state
+        expDate.disabled = !checkbox.checked;
+    });
+}
 
 // Handle form submission
 document.getElementById('certificateForm').addEventListener('submit', (e) => {
     e.preventDefault();
     document.getElementById('sbmtbtn').style.display = 'none';
+
     const formData = {
         inspectorNumber: parseInt(document.getElementById('inspectorNumber').value),
         roll_number: parseInt(document.getElementById('rollNumber').value),
         inspectorName: document.getElementById('inspectorName').value,
         fatherName: document.getElementById('fatherName').value,
         radiographic_testing_level_II: document.getElementById('radiographicTesting').checked,
+        radiographic_testing_level_II_ExpDate: document.getElementById('radiographicTestingExp').value || null,
         ultrasonic_testing_level_II: document.getElementById('ultrasonicTesting').checked,
+        ultrasonic_testing_level_II_ExpDate: document.getElementById('ultrasonicTestingExp').value || null,
         ultrasonic_Phased_Array_Level_II: document.getElementById('ultrasonicPhasedArray').checked,
+        ultrasonic_Phased_Array_Level_II_ExpDate: document.getElementById('ultrasonicPhasedArrayExp').value || null,
         visual_testing_level_II: document.getElementById('visualTesting').checked,
+        visual_testing_level_II_ExpDate: document.getElementById('visualTestingExp').value || null,
         liquid_penetrant_testing_level_II: document.getElementById('liquidPenetrantTesting').checked,
-        magnetic_particle_testing_level_II: document.getElementById('magneticParticleTesting').checked
+        liquid_penetrant_testing_level_II_ExpDate: document.getElementById('liquidPenetrantTestingExp').value || null,
+        magnetic_particle_testing_level_II: document.getElementById('magneticParticleTesting').checked,
+        magnetic_particle_testing_level_II_ExpDate: document.getElementById('magneticParticleTestingExp').value || null
     };
 
 
@@ -183,21 +216,34 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
 function editCertificate(id) {
     isEditing = true;
     const certificate = certificates.find(cert => cert.inspectorNumber === id);
-    editingId = id
-
+    editingId = id;
 
     document.getElementById('formTitle').textContent = 'Edit Certificate';
     document.getElementById('inspectorNumber').value = certificate.inspectorNumber;
     document.getElementById('rollNumber').value = certificate.roll_number;
     document.getElementById('inspectorName').value = certificate.inspectorName;
     document.getElementById('fatherName').value = certificate.fatherName;
-    document.getElementById('radiographicTesting').checked = certificate.radiographic_testing_level_II;
-    document.getElementById('ultrasonicTesting').checked = certificate.ultrasonic_testing_level_II;
-    document.getElementById('visualTesting').checked = certificate.visual_testing_level_II;
-    document.getElementById('liquidPenetrantTesting').checked = certificate.liquid_penetrant_testing_level_II;
-    document.getElementById('magneticParticleTesting').checked = certificate.magnetic_particle_testing_level_II;
-    document.getElementById('ultrasonicPhasedArray').checked = certificate.ultrasonic_Phased_Array_Level_II;
 
+    // Set certification checkboxes and exp dates
+    document.getElementById('radiographicTesting').checked = certificate.radiographic_testing_level_II;
+    document.getElementById('radiographicTestingExp').value = certificate.radiographic_testing_level_II_ExpDate?.split('T')[0] || '';
+
+    document.getElementById('ultrasonicTesting').checked = certificate.ultrasonic_testing_level_II;
+    document.getElementById('ultrasonicTestingExp').value = certificate.ultrasonic_testing_level_II_ExpDate?.split('T')[0] || '';
+
+    document.getElementById('visualTesting').checked = certificate.visual_testing_level_II;
+    document.getElementById('visualTestingExp').value = certificate.visual_testing_level_II_ExpDate?.split('T')[0] || '';
+
+    document.getElementById('liquidPenetrantTesting').checked = certificate.liquid_penetrant_testing_level_II;
+    document.getElementById('liquidPenetrantTestingExp').value = certificate.liquid_penetrant_testing_level_II_ExpDate?.split('T')[0] || '';
+
+    document.getElementById('magneticParticleTesting').checked = certificate.magnetic_particle_testing_level_II;
+    document.getElementById('magneticParticleTestingExp').value = certificate.magnetic_particle_testing_level_II_ExpDate?.split('T')[0] || '';
+
+    document.getElementById('ultrasonicPhasedArray').checked = certificate.ultrasonic_Phased_Array_Level_II;
+    document.getElementById('ultrasonicPhasedArrayExp').value = certificate.ultrasonic_Phased_Array_Level_II_ExpDate?.split('T')[0] || '';
+
+    setupCertificationCheckboxes();
     document.getElementById('certificateModal').style.display = 'block';
 }
 
@@ -229,21 +275,87 @@ function deleteCertificate(id) {
     }
 }
 
-// Show certificate details
+
+
 function showDetails(id) {
     const certificate = certificates.find(cert => cert.inspectorNumber === id);
+    const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not set';
+
+    // Create array of certification objects for easier filtering and mapping
+    const certifications = [
+        {
+            name: 'Radiographic Testing Level II',
+            active: certificate.radiographic_testing_level_II,
+            expDate: certificate.radiographic_testing_level_II_ExpDate
+        },
+        {
+            name: 'Ultrasonic Testing Level II',
+            active: certificate.ultrasonic_testing_level_II,
+            expDate: certificate.ultrasonic_testing_level_II_ExpDate
+        },
+        {
+            name: 'UT "Phased Array"',
+            active: certificate.ultrasonic_Phased_Array_Level_II,
+            expDate: certificate.ultrasonic_Phased_Array_Level_II_ExpDate
+        },
+        {
+            name: 'Visual Testing Level II',
+            active: certificate.visual_testing_level_II,
+            expDate: certificate.visual_testing_level_II_ExpDate
+        },
+        {
+            name: 'Liquid Penetrant Testing Level II',
+            active: certificate.liquid_penetrant_testing_level_II,
+            expDate: certificate.liquid_penetrant_testing_level_II_ExpDate
+        },
+        {
+            name: 'Magnetic Particle Testing Level II',
+            active: certificate.magnetic_particle_testing_level_II,
+            expDate: certificate.magnetic_particle_testing_level_II_ExpDate
+        }
+    ];
+
+    // Filter to get only active certifications
+    const activeCertifications = certifications.filter(cert => cert.active);
 
     const detailsHtml = `
-        <p><strong>Inspector Number:</strong> ${certificate.inspectorNumber}</p>
-        <p><strong>Roll Number:</strong> ${certificate.roll_number}</p>
-        <p><strong>Inspector Name:</strong> ${certificate.inspectorName}</p>
-        <p><strong>Father Name:</strong> ${certificate.fatherName}</p>
-        <p><strong>Radiographic Testing Level II:</strong> ${certificate.radiographic_testing_level_II ? 'Yes' : 'No'}</p>
-        <p><strong>Ultrasonic Testing Level II:</strong> ${certificate.ultrasonic_testing_level_II ? 'Yes' : 'No'}</p>
-        <p><strong>UT "Phased Array":</strong> ${certificate.ultrasonic_Phased_Array_Level_II ? 'Yes' : 'No'}</p>
-        <p><strong>Visual Testing Level II:</strong> ${certificate.visual_testing_level_II ? 'Yes' : 'No'}</p>
-        <p><strong>Liquid Penetrant Testing Level II:</strong> ${certificate.liquid_penetrant_testing_level_II ? 'Yes' : 'No'}</p>
-        <p><strong>Magnetic Particle Testing Level II:</strong> ${certificate.magnetic_particle_testing_level_II ? 'Yes' : 'No'}</p>
+        <table class="details-table">
+            <tr>
+                <th colspan="2">Basic Information</th>
+            </tr>
+            <tr>
+                <td>Inspector Number</td>
+                <td>${certificate.inspectorNumber}</td>
+            </tr>
+            <tr>
+                <td>Roll Number</td>
+                <td>${certificate.roll_number}</td>
+            </tr>
+            <tr>
+                <td>Inspector Name</td>
+                <td>${certificate.inspectorName}</td>
+            </tr>
+            <tr>
+                <td>Father Name</td>
+                <td>${certificate.fatherName}</td>
+            </tr>
+            ${activeCertifications.length > 0 ? `
+                <tr>
+                    <th colspan="2">Certifications</th>
+                </tr>
+                ${activeCertifications.map(cert => `
+                    <tr>
+                        <td>${cert.name}</td>
+                        <td>
+                            <div class="cert-status">
+                                <span class="status-indicator Yes">Yes</span>
+                                <span class="exp-date">${formatDate(cert.expDate)}</span>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('')}
+            ` : ''}
+        </table>
     `;
     document.getElementById('certificateDetails').innerHTML = detailsHtml;
     document.getElementById('detailsModal').style.display = 'block';
@@ -466,3 +578,4 @@ function objectIdToString(obj) {
 
 // Initial check for login status
 checkLoginStatus();
+setupCertificationCheckboxes();
