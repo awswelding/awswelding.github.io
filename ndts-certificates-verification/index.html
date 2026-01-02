@@ -4694,10 +4694,8 @@
 
 	<script>
 
-
-		document.getElementById('searchForm').addEventListener('submit', async function (e) {
-			e.preventDefault();
-			const inspectorNumber = document.getElementById('inspectorNumber').value;
+		// Function to perform the certificate search
+		async function searchCertificate(inspectorNumber, updateUrl = true) {
 			const loadingDiv = document.getElementById('loading');
 			const resultDiv = document.getElementById('result');
 			const errorDiv = document.getElementById('error');
@@ -4705,6 +4703,13 @@
 			loadingDiv.classList.remove('hidden');
 			resultDiv.classList.add('hidden');
 			errorDiv.classList.add('hidden');
+
+			// Update the URL with the inspector number (without reloading the page)
+			if (updateUrl) {
+				const newUrl = new URL(window.location.href);
+				newUrl.searchParams.set('inspector', inspectorNumber);
+				window.history.pushState({ inspector: inspectorNumber }, '', newUrl);
+			}
 
 			try {
 				const response = await axios.get(`https://awswelding.runasp.net/api/Items/inspector/${inspectorNumber}`);
@@ -4782,8 +4787,35 @@
 				loadingDiv.classList.add('hidden');
 				errorDiv.classList.remove('hidden');
 			}
+		}
+
+		// Handle form submission
+		document.getElementById('searchForm').addEventListener('submit', function (e) {
+			e.preventDefault();
+			const inspectorNumber = document.getElementById('inspectorNumber').value;
+			if (inspectorNumber) {
+				searchCertificate(inspectorNumber);
+			}
 		});
 
+		// Check for inspector number in URL on page load
+		document.addEventListener('DOMContentLoaded', function () {
+			const urlParams = new URLSearchParams(window.location.search);
+			const inspectorFromUrl = urlParams.get('inspector');
+			if (inspectorFromUrl) {
+				// Set the input value and trigger search
+				document.getElementById('inspectorNumber').value = inspectorFromUrl;
+				searchCertificate(inspectorFromUrl, false); // false = don't update URL again
+			}
+		});
+
+		// Handle browser back/forward buttons
+		window.addEventListener('popstate', function (event) {
+			if (event.state && event.state.inspector) {
+				document.getElementById('inspectorNumber').value = event.state.inspector;
+				searchCertificate(event.state.inspector, false);
+			}
+		});
 
 	</script>
 
