@@ -381,6 +381,7 @@ function renderCoursesTable() {
         <table>
             <thead>
                 <tr>
+                    <th>Name</th>
                     <th>Course Title</th>
                     <th>Inspector #</th>
                     <th>Actions</th>
@@ -389,6 +390,7 @@ function renderCoursesTable() {
             <tbody>
                 ${courses.map(course => `
                     <tr>
+                        <td>${course.name || ''}</td>
                         <td>${course.courseTitle}</td>
                         <td>${course.certificateID}</td>
                         <td>
@@ -418,6 +420,7 @@ async function editCourse(certId) {
     editingCourseId = certId;
 
     document.getElementById('courseFormTitle').textContent = 'Edit Course';
+    document.getElementById('courseName').value = course.name || '';
     document.getElementById('courseTitle').value = course.courseTitle;
     document.getElementById('certificateID').value = course.certificateID;
 
@@ -441,6 +444,7 @@ document.getElementById('courseForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const courseData = {
+        name: document.getElementById('courseName').value,
         courseTitle: document.getElementById('courseTitle').value,
         certificateID: parseInt(document.getElementById('certificateID').value)
     };
