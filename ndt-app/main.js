@@ -40,7 +40,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     password = document.getElementById('password').value;
 
     try {
-        const response = await axios.post(`${API_URL}/api/Account/LgoIn`, { userName: username, passsword: password });
+        const response = await axios.post(`${API_URL}/api/Account/Login`, { userName: username, passsword: password });
         sessionStorage.setItem('username', username);
         sessionStorage.setItem('password', password);
         showDashboard();

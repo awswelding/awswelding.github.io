@@ -4506,8 +4506,8 @@
 															<div class="fcontainer">
 																<h1>Online Result System</h1>
 																<form id="searchForm">
-																	<label for="inspectorNumber">Inspector
-																		Number:</label>
+																	<label for="inspectorNumber">Certificate
+																		number:</label>
 																	<input type="number" id="inspectorNumber" required>
 																	<button type="submit">Search</button>
 																</form>
@@ -4715,7 +4715,7 @@
 				// Fetch inspector data (includes embedded certificates)
 				const inspectorResponse = await axios.get(`https://awswelding.runasp.net/api/Inspectors/inspector/${inspectorNumber}`);
 				const inspector = inspectorResponse.data;
-				
+
 				// Use embedded certificates
 				const certificates = inspector.certificates || [];
 
