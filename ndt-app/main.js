@@ -1,10 +1,13 @@
-const API_URL = 'https://awswelding.runasp.net'; // Replace with your actual API URL
+const API_URL = 'https://awswelding.runasp.net';
 
-let certificates = [];
+let inspectors = []; // Renamed from certificates
+let certificatesList = []; // NEW: for individual certificates
 let courses = [];
+let isEditingInspector = false;
 let isEditingCertificate = false;
 let isEditingCourse = false;
-let editingCertificateId = null;
+let editingInspectorId = null;
+let editingCertificateNumber = null;
 let editingCourseId = null;
 let username, password;
 
@@ -27,7 +30,7 @@ function showLogin() {
 function showDashboard() {
     document.getElementById('loginSection').style.display = 'none';
     document.getElementById('dashboardSection').style.display = 'block';
-    fetchCertificates();
+    fetchInspectors();
 }
 
 // Login form submission
@@ -69,9 +72,11 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     showLogin();
 });
 
-// Fetch all certificates
-function fetchCertificates() {
-    fetch(`${API_URL}/api/Items/all`, {
+// ==================== INSPECTORS TAB ====================
+
+// Fetch all inspectors
+function fetchInspectors() {
+    fetch(`${API_URL}/api/Inspectors/all`, {
         headers: {
             'username': username,
             'password': password
@@ -79,36 +84,32 @@ function fetchCertificates() {
     })
         .then(response => response.json())
         .then(data => {
-            certificates = data;
-            renderTable();
+            inspectors = data;
+            renderInspectorsTable();
         })
         .catch(error => console.error('Error:', error));
 }
 
-// Render certificates table
-function renderTable() {
+// Render inspectors table
+function renderInspectorsTable() {
     const tableHtml = `
         <table>
             <thead>
                 <tr>
                     <th>Inspector Number</th>
-                    <th>Roll Number</th>
-                    <th>Inspector Name</th>
-                    <th>Father Name</th>
+                    <th>Full Name</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                ${certificates.map(cert => `
+                ${inspectors.map(inspector => `
                     <tr>
-                        <td>${cert.inspectorNumber}</td>
-                        <td>${cert.roll_number}</td>
-                        <td>${cert.inspectorName}</td>
-                        <td>${cert.fatherName}</td>
+                        <td>${inspector.inspectorNumber}</td>
+                        <td>${inspector.fullName}</td>
                         <td class="action-buttons">
-                            <button class="edit-btn" onclick="editCertificate(${cert.inspectorNumber})">Edit</button>
-                            <button class="delete-btn" onclick="deleteCertificate(${cert.inspectorNumber})">Delete</button>
-                            <button class="details-btn" onclick="showDetails(${cert.inspectorNumber})">Details</button>
+                            <button class="edit-btn" onclick="editInspector(${inspector.inspectorNumber})">Edit</button>
+                            <button class="delete-btn" onclick="deleteInspector(${inspector.inspectorNumber})">Delete</button>
+                            <button class="details-btn" onclick="viewInspectorCertificates(${inspector.inspectorNumber})">Certificates</button>
                         </td>
                     </tr>
                 `).join('')}
@@ -118,69 +119,29 @@ function renderTable() {
     document.getElementById('certificateTable').innerHTML = tableHtml;
 }
 
-// Add new certificate
+// Add new inspector
 document.getElementById('addCertificateBtn').addEventListener('click', () => {
-    isEditing = false;
-    editingId = null;
-    document.getElementById('formTitle').textContent = 'Add New Certificate';
+    isEditingInspector = false;
+    editingInspectorId = null;
+    document.getElementById('formTitle').textContent = 'Add New Inspector';
     document.getElementById('certificateForm').reset();
     document.getElementById('certificateModal').style.display = 'block';
-    setupCertificationCheckboxes();
 });
 
-function setupCertificationCheckboxes() {
-    const certifications = [
-        'radiographicTesting',
-        'ultrasonicTesting',
-        'ultrasonicPhasedArray',
-        'visualTesting',
-        'liquidPenetrantTesting',
-        'magneticParticleTesting'
-    ];
-
-    certifications.forEach(cert => {
-        const checkbox = document.getElementById(cert);
-        const expDate = document.getElementById(`${cert}Exp`);
-
-        checkbox.addEventListener('change', () => {
-            expDate.disabled = !checkbox.checked;
-            if (!checkbox.checked) {
-                expDate.value = '';
-            }
-        });
-
-        // Initial state
-        expDate.disabled = !checkbox.checked;
-    });
-}
-
-// Handle form submission
+// Handle inspector form submission
 document.getElementById('certificateForm').addEventListener('submit', (e) => {
     e.preventDefault();
     document.getElementById('sbmtbtn').style.display = 'none';
 
     const formData = {
         inspectorNumber: parseInt(document.getElementById('inspectorNumber').value),
-        roll_number: parseInt(document.getElementById('rollNumber').value),
-        inspectorName: document.getElementById('inspectorName').value,
-        fatherName: document.getElementById('fatherName').value,
-        radiographic_testing_level_II: document.getElementById('radiographicTesting').checked,
-        radiographic_testing_level_II_ExpDate: document.getElementById('radiographicTestingExp').value || null,
-        ultrasonic_testing_level_II: document.getElementById('ultrasonicTesting').checked,
-        ultrasonic_testing_level_II_ExpDate: document.getElementById('ultrasonicTestingExp').value || null,
-        ultrasonic_Phased_Array_Level_II: document.getElementById('ultrasonicPhasedArray').checked,
-        ultrasonic_Phased_Array_Level_II_ExpDate: document.getElementById('ultrasonicPhasedArrayExp').value || null,
-        visual_testing_level_II: document.getElementById('visualTesting').checked,
-        visual_testing_level_II_ExpDate: document.getElementById('visualTestingExp').value || null,
-        liquid_penetrant_testing_level_II: document.getElementById('liquidPenetrantTesting').checked,
-        liquid_penetrant_testing_level_II_ExpDate: document.getElementById('liquidPenetrantTestingExp').value || null,
-        magnetic_particle_testing_level_II: document.getElementById('magneticParticleTesting').checked,
-        magnetic_particle_testing_level_II_ExpDate: document.getElementById('magneticParticleTestingExp').value || null
+        fullName: document.getElementById('fullName').value
     };
 
-
-    const url = isEditing ? `${API_URL}/api/Items/${editingId}` : `${API_URL}/api/Items`;
-    const method = isEditing ? 'PUT' : 'POST';
+    const url = isEditingInspector
+        ? `${API_URL}/api/Inspectors/${editingInspectorId}`
+        : `${API_URL}/api/Inspectors`;
+    const method = isEditingInspector ? 'PUT' : 'POST';
 
     fetch(url, {
         method: method,
@@ -192,68 +153,203 @@ document.getElementById('certificateForm').addEventListener('submit', (e) => {
         body: JSON.stringify(formData)
     })
         .then(response => {
-            if (!response.ok) { // If the status is not 200-299, throw an error
+            if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             return response.json();
         })
         .then(() => {
-            fetchCertificates();
+            fetchInspectors();
             document.getElementById('certificateModal').style.display = 'none';
             document.getElementById('sbmtbtn').style.display = 'block';
-            showMessage(isEditing ? 'Certificate updated successfully!' : 'Certificate added successfully!');
+            showMessage(isEditingInspector ? 'Inspector updated successfully!' : 'Inspector added successfully!');
         })
         .catch(error => {
             console.error('Error:', error);
             document.getElementById('sbmtbtn').style.display = 'block';
             showMessage('An error occurred. Please try again.', true);
         });
-
 });
 
-// Edit certificate
+// Edit inspector
+function editInspector(inspectorNumber) {
+    isEditingInspector = true;
+    const inspector = inspectors.find(insp => insp.inspectorNumber === inspectorNumber);
+    editingInspectorId = inspectorNumber;
 
-function editCertificate(id) {
-    isEditing = true;
-    const certificate = certificates.find(cert => cert.inspectorNumber === id);
-    editingId = id;
+    document.getElementById('formTitle').textContent = 'Edit Inspector';
+    document.getElementById('inspectorNumber').value = inspector.inspectorNumber;
+    document.getElementById('fullName').value = inspector.fullName;
 
-    document.getElementById('formTitle').textContent = 'Edit Certificate';
-    document.getElementById('inspectorNumber').value = certificate.inspectorNumber;
-    document.getElementById('rollNumber').value = certificate.roll_number;
-    document.getElementById('inspectorName').value = certificate.inspectorName;
-    document.getElementById('fatherName').value = certificate.fatherName;
-
-    // Set certification checkboxes and exp dates
-    document.getElementById('radiographicTesting').checked = certificate.radiographic_testing_level_II;
-    document.getElementById('radiographicTestingExp').value = certificate.radiographic_testing_level_II_ExpDate?.split('T')[0] || '';
-
-    document.getElementById('ultrasonicTesting').checked = certificate.ultrasonic_testing_level_II;
-    document.getElementById('ultrasonicTestingExp').value = certificate.ultrasonic_testing_level_II_ExpDate?.split('T')[0] || '';
-
-    document.getElementById('visualTesting').checked = certificate.visual_testing_level_II;
-    document.getElementById('visualTestingExp').value = certificate.visual_testing_level_II_ExpDate?.split('T')[0] || '';
-
-    document.getElementById('liquidPenetrantTesting').checked = certificate.liquid_penetrant_testing_level_II;
-    document.getElementById('liquidPenetrantTestingExp').value = certificate.liquid_penetrant_testing_level_II_ExpDate?.split('T')[0] || '';
-
-    document.getElementById('magneticParticleTesting').checked = certificate.magnetic_particle_testing_level_II;
-    document.getElementById('magneticParticleTestingExp').value = certificate.magnetic_particle_testing_level_II_ExpDate?.split('T')[0] || '';
-
-    document.getElementById('ultrasonicPhasedArray').checked = certificate.ultrasonic_Phased_Array_Level_II;
-    document.getElementById('ultrasonicPhasedArrayExp').value = certificate.ultrasonic_Phased_Array_Level_II_ExpDate?.split('T')[0] || '';
-
-    setupCertificationCheckboxes();
     document.getElementById('certificateModal').style.display = 'block';
 }
 
+// Delete inspector
+function deleteInspector(inspectorNumber) {
+    if (confirm('Are you sure you want to delete this inspector?')) {
+        fetch(`${API_URL}/api/Inspectors/${inspectorNumber}`, {
+            method: 'DELETE',
+            headers: {
+                'username': username,
+                'password': password
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    fetchInspectors();
+                    showMessage('Inspector deleted successfully!');
+                } else {
+                    throw new Error('Failed to delete inspector');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred while deleting the inspector.', true);
+            });
+    }
+}
+
+// View inspector certificates
+function viewInspectorCertificates(inspectorNumber) {
+    // Switch to certificates tab and filter by inspector
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+    document.querySelector('[data-tab="certList"]').classList.add('active');
+    document.getElementById('certListTab').classList.add('active');
+
+    fetchCertificates(inspectorNumber);
+}
+
+// ==================== CERTIFICATES TAB ====================
+
+// Fetch certificates (optionally filtered by inspector)
+function fetchCertificates(inspectorNumber = null) {
+    const url = inspectorNumber
+        ? `${API_URL}/api/Certificates/inspector/${inspectorNumber}`
+        : `${API_URL}/api/Certificates/all`;
+
+    fetch(url, {
+        headers: {
+            'username': username,
+            'password': password
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            certificatesList = data;
+            renderCertificatesTable();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Render certificates table
+function renderCertificatesTable() {
+    const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'No expiry';
+
+    const tableHtml = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Certificate Number</th>
+                    <th>Inspector Number</th>
+                    <th>Certificate Name</th>
+                    <th>Expiry Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${certificatesList.map(cert => `
+                    <tr>
+                        <td>${cert.certificateNumber}</td>
+                        <td>${cert.inspectorNumber}</td>
+                        <td>${cert.certificateName}</td>
+                        <td>${formatDate(cert.expiryDate)}</td>
+                        <td class="action-buttons">
+                            <button class="edit-btn" onclick="editCertificate('${cert.certificateNumber}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteCertificate('${cert.certificateNumber}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    document.getElementById('certificateListTable').innerHTML = tableHtml;
+}
+
+// Add new certificate
+document.getElementById('addNewCertificateBtn').addEventListener('click', () => {
+    isEditingCertificate = false;
+    editingCertificateNumber = null;
+    document.getElementById('newCertFormTitle').textContent = 'Add New Certificate';
+    document.getElementById('newCertificateForm').reset();
+    document.getElementById('newCertificateModal').style.display = 'block';
+});
+
+// Handle certificate form submission
+document.getElementById('newCertificateForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.getElementById('certSbmtBtn').style.display = 'none';
+
+    const formData = {
+        certificateNumber: document.getElementById('certNumber').value,
+        inspectorNumber: parseInt(document.getElementById('certInspectorNumber').value),
+        certificateName: document.getElementById('certName').value,
+        expiryDate: document.getElementById('certExpiryDate').value
+    };
+
+    const url = isEditingCertificate
+        ? `${API_URL}/api/Certificates/${editingCertificateNumber}`
+        : `${API_URL}/api/Certificates`;
+    const method = isEditingCertificate ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'username': username,
+            'password': password
+        },
+        body: JSON.stringify(formData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(() => {
+            fetchCertificates();
+            document.getElementById('newCertificateModal').style.display = 'none';
+            document.getElementById('certSbmtBtn').style.display = 'block';
+            showMessage(isEditingCertificate ? 'Certificate updated successfully!' : 'Certificate added successfully!');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('certSbmtBtn').style.display = 'block';
+            showMessage('An error occurred. Please try again.', true);
+        });
+});
+
+// Edit certificate
+function editCertificate(certificateNumber) {
+    isEditingCertificate = true;
+    const cert = certificatesList.find(c => c.certificateNumber === certificateNumber);
+    editingCertificateNumber = certificateNumber;
+
+    document.getElementById('newCertFormTitle').textContent = 'Edit Certificate';
+    document.getElementById('certNumber').value = cert.certificateNumber;
+    document.getElementById('certInspectorNumber').value = cert.inspectorNumber;
+    document.getElementById('certName').value = cert.certificateName;
+    document.getElementById('certExpiryDate').value = cert.expiryDate ? new Date(cert.expiryDate).toISOString().split('T')[0] : '';
+
+    document.getElementById('newCertificateModal').style.display = 'block';
+}
+
 // Delete certificate
-function deleteCertificate(id) {
-
-    var delid = id
-
+function deleteCertificate(certificateNumber) {
     if (confirm('Are you sure you want to delete this certificate?')) {
-        fetch(`${API_URL}/api/Items/${delid}`, {
+        fetch(`${API_URL}/api/Certificates/${certificateNumber}`, {
             method: 'DELETE',
             headers: {
                 'username': username,
@@ -275,92 +371,7 @@ function deleteCertificate(id) {
     }
 }
 
-
-
-function showDetails(id) {
-    const certificate = certificates.find(cert => cert.inspectorNumber === id);
-    const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not set';
-
-    // Create array of certification objects for easier filtering and mapping
-    const certifications = [
-        {
-            name: 'Radiographic Testing Level II',
-            active: certificate.radiographic_testing_level_II,
-            expDate: certificate.radiographic_testing_level_II_ExpDate
-        },
-        {
-            name: 'Ultrasonic Testing Level II',
-            active: certificate.ultrasonic_testing_level_II,
-            expDate: certificate.ultrasonic_testing_level_II_ExpDate
-        },
-        {
-            name: 'UT "Phased Array"',
-            active: certificate.ultrasonic_Phased_Array_Level_II,
-            expDate: certificate.ultrasonic_Phased_Array_Level_II_ExpDate
-        },
-        {
-            name: 'Visual Testing Level II',
-            active: certificate.visual_testing_level_II,
-            expDate: certificate.visual_testing_level_II_ExpDate
-        },
-        {
-            name: 'Liquid Penetrant Testing Level II',
-            active: certificate.liquid_penetrant_testing_level_II,
-            expDate: certificate.liquid_penetrant_testing_level_II_ExpDate
-        },
-        {
-            name: 'Magnetic Particle Testing Level II',
-            active: certificate.magnetic_particle_testing_level_II,
-            expDate: certificate.magnetic_particle_testing_level_II_ExpDate
-        }
-    ];
-
-    // Filter to get only active certifications
-    const activeCertifications = certifications.filter(cert => cert.active);
-
-    const detailsHtml = `
-        <table class="details-table">
-            <tr>
-                <th colspan="2">Basic Information</th>
-            </tr>
-            <tr>
-                <td>Inspector Number</td>
-                <td>${certificate.inspectorNumber}</td>
-            </tr>
-            <tr>
-                <td>Roll Number</td>
-                <td>${certificate.roll_number}</td>
-            </tr>
-            <tr>
-                <td>Inspector Name</td>
-                <td>${certificate.inspectorName}</td>
-            </tr>
-            <tr>
-                <td>Father Name</td>
-                <td>${certificate.fatherName}</td>
-            </tr>
-            ${activeCertifications.length > 0 ? `
-                <tr>
-                    <th colspan="2">Certifications</th>
-                </tr>
-                ${activeCertifications.map(cert => `
-                    <tr>
-                        <td>${cert.name}</td>
-                        <td>
-                            <div class="cert-status">
-                                <span class="status-indicator Yes">Yes</span>
-                                <span class="exp-date">${formatDate(cert.expDate)}</span>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('')}
-            ` : ''}
-        </table>
-    `;
-    document.getElementById('certificateDetails').innerHTML = detailsHtml;
-    document.getElementById('detailsModal').style.display = 'block';
-}
-
+// ==================== TAB NAVIGATION ====================
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -375,9 +386,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         // Fetch data for the selected tab
         if (btn.dataset.tab === 'courses') {
             fetchCourses();
+        } else if (btn.dataset.tab === 'certList') {
+            fetchCertificates();
         }
     });
 });
+
+// ==================== COURSES TAB (unchanged) ====================
 
 // Fetch Courses
 function fetchCourses() {
@@ -531,6 +546,7 @@ function showCourseDetails(id) {
     document.getElementById('courseDetailsModal').style.display = 'block';
 }
 
+// ==================== UTILITY FUNCTIONS ====================
 
 // Show message function
 function showMessage(message, isError = false) {
@@ -559,23 +575,5 @@ window.onclick = function (event) {
     }
 }
 
-
-function objectIdToString(obj) {
-    // Ensure all parts are available
-    if (!obj.timestamp || !obj.machine || !obj.pid || !obj.increment) {
-        throw new Error('Invalid ObjectId-like object');
-    }
-
-    // Convert to hexadecimal strings and pad with zeros
-    const timestamp = obj.timestamp.toString(16).padStart(8, '0');
-    const machine = obj.machine.toString(16).padStart(6, '0');
-    const pid = obj.pid.toString(16).padStart(4, '0');
-    const increment = obj.increment.toString(16).padStart(6, '0');
-
-    // Concatenate all parts
-    return timestamp + machine + pid + increment;
-}
-
 // Initial check for login status
 checkLoginStatus();
-setupCertificationCheckboxes();

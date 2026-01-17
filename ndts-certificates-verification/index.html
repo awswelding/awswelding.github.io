@@ -4712,70 +4712,58 @@
 			}
 
 			try {
-				const response = await axios.get(`https://awswelding.runasp.net/api/Items/inspector/${inspectorNumber}`);
-				const certificate = response.data;
+				// Fetch inspector data
+				const inspectorResponse = await axios.get(`https://awswelding.runasp.net/api/Inspectors/inspector/${inspectorNumber}`);
+				const inspector = inspectorResponse.data;
+
+				// Fetch certificates for this inspector
+				const certResponse = await axios.get(`https://awswelding.runasp.net/api/Certificates/inspector/${inspectorNumber}`);
+				const certificates = certResponse.data;
 
 				// Display basic information
-				document.getElementById('inspectorNumberResult').textContent = certificate.inspectorNumber;
-				document.getElementById('rollNumber').textContent = certificate.roll_number;
-				document.getElementById('inspectorName').textContent = certificate.inspectorName;
-				document.getElementById('fatherName').textContent = certificate.fatherName;
+				document.getElementById('inspectorNumberResult').textContent = inspector.inspectorNumber;
+				document.getElementById('rollNumber').textContent = 'N/A'; // No longer used
+				document.getElementById('inspectorName').textContent = inspector.fullName;
+				document.getElementById('fatherName').textContent = ''; // Merged into full name
 
 				const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'Not set';
 
-				const ndtMethods = [
-					{
-						id: 'liquidPenetrant',
-						field: 'liquid_penetrant_testing_level_II',
-						expField: 'liquid_penetrant_testing_level_II_ExpDate',
-						text: "Liquid Penetrant Testing Level II"
-					},
-					{
-						id: 'magneticParticle',
-						field: 'magnetic_particle_testing_level_II',
-						expField: 'magnetic_particle_testing_level_II_ExpDate',
-						text: "Magnetic Particle Testing Level II"
-					},
-					{
-						id: 'radiographic',
-						field: 'radiographic_testing_level_II',
-						expField: 'radiographic_testing_level_II_ExpDate',
-						text: "Radiographic Testing Level II"
-					},
-					{
-						id: 'ultrasonic',
-						field: 'ultrasonic_testing_level_II',
-						expField: 'ultrasonic_testing_level_II_ExpDate',
-						text: "Ultrasonic Testing Level II"
-					},
-					{
-						id: 'ultrasonicPhasedArray',
-						field: 'ultrasonic_Phased_Array_Level_II',
-						expField: 'ultrasonic_Phased_Array_Level_II_ExpDate',
-						text: 'UT "Phased Array"'
-					},
-					{
-						id: 'visual',
-						field: 'visual_testing_level_II',
-						expField: 'visual_testing_level_II_ExpDate',
-						text: "Visual Testing Level II"
-					}
+				// Clear all certificate rows first
+				const allRows = [
+					'liquidPenetrantRow', 'magneticParticleRow', 'radiographicRow',
+					'ultrasonicRow', 'ultrasonicPhasedArrayRow', 'visualRow'
 				];
+				allRows.forEach(rowId => {
+					const row = document.getElementById(rowId);
+					if (row) row.classList.add('hidden');
+				});
 
-				ndtMethods.forEach(method => {
-					const row = document.getElementById(`${method.id}Row`);
-					const cell = document.getElementById(method.id);
-					if (certificate[method.field]) {
-						const expDate = formatDate(certificate[method.expField]);
+				// Display each certificate
+				certificates.forEach(cert => {
+					const certName = cert.certificateName.toLowerCase();
+					let rowId = null;
+
+					// Map certificate names to row IDs
+					if (certName.includes('liquid penetrant')) rowId = 'liquidPenetrantRow';
+					else if (certName.includes('magnetic particle')) rowId = 'magneticParticleRow';
+					else if (certName.includes('radiographic')) rowId = 'radiographicRow';
+					else if (certName.includes('phased array')) rowId = 'ultrasonicPhasedArrayRow';
+					else if (certName.includes('ultrasonic') && !certName.includes('phased')) rowId = 'ultrasonicRow';
+					else if (certName.includes('visual')) rowId = 'visualRow';
+
+					if (rowId) {
+						const row = document.getElementById(rowId);
+						const cell = row.querySelector('.value'); // Changed from td:last-child to .value
+
+						const expDate = formatDate(cert.expiryDate);
 						cell.innerHTML = `
-                    <div class="cert-info">
-                        <div class="cert-name">${method.text}</div>
-                        <div class="cert-expiry">Expires: ${expDate}</div>
-                    </div>
-                `;
+						<div class="cert-info">
+							<div class="cert-name">${cert.certificateName}</div>
+							<div class="cert-expiry">Expires: ${expDate}</div>
+							<div class="cert-number">Cert #: ${cert.certificateNumber}</div>
+						</div>
+					`;
 						row.classList.remove('hidden');
-					} else {
-						row.classList.add('hidden');
 					}
 				});
 
@@ -4783,7 +4771,7 @@
 				resultDiv.classList.remove('hidden');
 			} catch (error) {
 				console.error('Error fetching certificate:', error);
-				errorDiv.textContent = 'Certificate not found or an error occurred.';
+				errorDiv.textContent = 'Inspector not found or an error occurred.';
 				loadingDiv.classList.add('hidden');
 				errorDiv.classList.remove('hidden');
 			}
