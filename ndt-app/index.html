@@ -52,13 +52,15 @@
                 </div>
             </div>
 
-            <!-- NEW: Certificates List Tab -->\r
-            <div id=\"certListTab\" class=\"tab-content\">\r
-                <div class=\"card\">\r
-                    <h2>Certificates</h2>\r
-                    <button id=\"addNewCertificateBtn\">Add New Certificate</button>\r
-                    <div id=\"certificateListTable\"></div>\r
-                </div>\r
+            <!-- Certificates Tab (Master Types) -->
+            <div id="certListTab" class="tab-content">
+                <div class="card">
+                    <h2>Certificate Types</h2>
+                    <p style="font-size: 14px; color: #666;">Manage available certificate types that can be assigned to
+                        inspectors</p>
+                    <button id="addNewCertificateBtn">Add New Certificate Type</button>
+                    <div id="certificateListTable"></div>
+                </div>
             </div>
 
             <!-- Courses Tab -->
@@ -84,6 +86,14 @@
                         <label for="fullName">Full Name:</label>
                         <input type="text" id="fullName" required placeholder="Enter full name">
                     </div>
+
+                    <div class="form-group">
+                        <label>Certificates:</label>
+                        <div id="certificatesCheckboxes" class="checkbox-group">
+                            <!-- Certificates will be loaded dynamically from master list -->
+                        </div>
+                    </div>
+
                     <button id="sbmtbtn" type="submit">Submit</button>
                 </form>
             </div>
@@ -99,31 +109,33 @@
         </div>
     </div>
 
-    <!-- NEW: Certificate Management Modal -->\r
-    <div id=\"newCertificateModal\" class=\"modal\">\r
-        <div class=\"modal-content\">\r
-            <span class=\"close\">&times;</span>\r
-            <h2 id=\"newCertFormTitle\">Add New Certificate</h2>\r
-            <form id=\"newCertificateForm\">\r
-                <div class=\"form-group\">\r
-                    <label for=\"certNumber\">Certificate Number:</label>\r
-                    <input type=\"text\" id=\"certNumber\" required placeholder=\"e.g., A-101, CERT/2026\">\r
-                </div>\r
-                <div class=\"form-group\">\r
-                    <label for=\"certInspectorNumber\">Inspector Number:</label>\r
-                    <input type=\"number\" id=\"certInspectorNumber\" required>\r
-                </div>\r
-                <div class=\"form-group\">\r
-                    <label for=\"certName\">Certificate Name:</label>\r
-                    <input type=\"text\" id=\"certName\" required placeholder=\"e.g., Radiographic Testing Level II\">\r
-                </div>\r
-                <div class=\"form-group\">\r
-                    <label for=\"certExpiryDate\">Expiry Date:</label>\r
-                    <input type=\"date\" id=\"certExpiryDate\" required>\r
-                </div>\r
-                <button id=\"certSbmtBtn\" type=\"submit\">Submit</button>\r
-            </form>\r
-        </div>\r
+    <!-- Certificate Type Management Modal -->
+    <div id="newCertificateModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="newCertFormTitle">Add Certificate Type</h2>
+            <form id="newCertificateForm">
+                <div class="form-group">
+                    <label for="certName">Certificate Name:</label>
+                    <input type="text" id="certName" required placeholder="e.g., Radiographic Testing Level II">
+                </div>
+                <div class="form-group">
+                    <label for="certCode">Certificate Code:</label>
+                    <input type="text" id="certCode" required placeholder="e.g., RT-L2">
+                </div>
+                <div class="form-group">
+                    <label for="certDescription">Description (Optional):</label>
+                    <textarea id="certDescription" rows="3"
+                        placeholder="Additional details about this certificate type"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="certActive" checked> Active
+                    </label>
+                </div>
+                <button id="certSbmtBtn" type="submit">Submit</button>
+            </form>
+        </div>
     </div>
 
     <!-- Course Form Modal -->
@@ -159,7 +171,7 @@
     </div>
     </div>
 
-    <script src="main.js"></script>
+    <script src="main.js?v=3.0"></script>
 </body>
 
 </html>

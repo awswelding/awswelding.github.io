@@ -1,17 +1,17 @@
 const API_URL = 'https://awswelding.runasp.net';
 
-let inspectors = []; // Renamed from certificates
-let certificatesList = []; // NEW: for individual certificates
+let inspectors = [];
+let masterCertificates = []; // Master certificate types
 let courses = [];
 let isEditingInspector = false;
 let isEditingCertificate = false;
 let isEditingCourse = false;
 let editingInspectorId = null;
-let editingCertificateNumber = null;
+let editingCertificateId = null;
 let editingCourseId = null;
 let username, password;
 
-// Show login or dashboard based on session storage
+// ============= AUTH =============
 function checkLoginStatus() {
     username = sessionStorage.getItem('username');
     password = sessionStorage.getItem('password');
@@ -30,74 +30,95 @@ function showLogin() {
 function showDashboard() {
     document.getElementById('loginSection').style.display = 'none';
     document.getElementById('dashboardSection').style.display = 'block';
+    loadMasterCertificates(); // Load certificate types first
     fetchInspectors();
 }
 
-// Login form submission
-document.getElementById('loginForm').addEventListener('submit', (e) => {
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
 
-    fetch(`${API_URL}/api/Account/Login`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            UserName: username,
-            Passsword: password
-        }),
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message === "Login successful.") {
-                sessionStorage.setItem('username', username);
-                sessionStorage.setItem('password', password);
-                showDashboard();
-            } else {
-                document.getElementById('errorMessage').textContent = data.message;
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            document.getElementById('errorMessage').textContent = 'An error occurred. Please try again.';
-        });
+    try {
+        const response = await axios.post(`${API_URL}/api/Account/LgoIn`, { userName: username, passsword: password });
+        sessionStorage.setItem('username', username);
+        sessionStorage.setItem('password', password);
+        showDashboard();
+    } catch (error) {
+        alert('Login failed. Please check your credentials.');
+    }
 });
 
-// Logout functionality
 document.getElementById('logoutBtn').addEventListener('click', () => {
-    sessionStorage.removeItem('username');
-    sessionStorage.removeItem('password');
+    sessionStorage.clear();
     showLogin();
 });
 
-// ==================== INSPECTORS TAB ====================
-
-// Fetch all inspectors
-function fetchInspectors() {
-    fetch(`${API_URL}/api/Inspectors/all`, {
-        headers: {
-            'username': username,
-            'password': password
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            inspectors = data;
-            renderInspectorsTable();
-        })
-        .catch(error => console.error('Error:', error));
+// ============= MASTER CERTIFICATES =============
+async function loadMasterCertificates() {
+    try {
+        const response = await axios.get(`${API_URL}/api/Certificates/active`);
+        masterCertificates = response.data;
+        renderCertificateCheckboxes();
+    } catch (error) {
+        console.error('Error loading master certificates:', error);
+    }
 }
 
-// Render inspectors table
+function renderCertificateCheckboxes() {
+    const container = document.getElementById('certificatesCheckboxes');
+    if (!container) return;
+
+    container.innerHTML = masterCertificates.map(cert => `
+        <div class="certificate-checkbox-item" style="margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <label style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" 
+                       data-cert-id="${cert.id}" 
+                       data-cert-name="${cert.certificateName}"
+                       class="cert-checkbox">
+                <span style="flex: 1; font-weight: 500;">${cert.certificateName}</span>
+                <input type="date" 
+                       class="cert-expiry" 
+                       data-cert-id="${cert.id}"
+                       style="padding: 5px;" 
+                       placeholder="Expiry Date"
+                       disabled>
+            </label>
+        </div>
+    `).join('');
+
+    // Enable/disable expiry date inputs
+    document.querySelectorAll('.cert-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            const expiryInput = container.querySelector(`.cert-expiry[data-cert-id="${this.dataset.certId}"]`);
+            expiryInput.disabled = !this.checked;
+            if (!this.checked) expiryInput.value = '';
+        });
+    });
+}
+
+// ============= INSPECTORS =============
+async function fetchInspectors() {
+    try {
+        const response = await axios.get(`${API_URL}/api/Inspectors/all`, {
+            headers: { username, password }
+        });
+        inspectors = response.data;
+        renderInspectorsTable();
+    } catch (error) {
+        console.error('Error fetching inspectors:', error);
+        alert('Error loading inspectors');
+    }
+}
+
 function renderInspectorsTable() {
     const tableHtml = `
         <table>
             <thead>
                 <tr>
-                    <th>Inspector Number</th>
+                    <th>Inspector #</th>
                     <th>Full Name</th>
+                    <th>Certificates</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -106,10 +127,10 @@ function renderInspectorsTable() {
                     <tr>
                         <td>${inspector.inspectorNumber}</td>
                         <td>${inspector.fullName}</td>
-                        <td class="action-buttons">
-                            <button class="edit-btn" onclick="editInspector(${inspector.inspectorNumber})">Edit</button>
-                            <button class="delete-btn" onclick="deleteInspector(${inspector.inspectorNumber})">Delete</button>
-                            <button class="details-btn" onclick="viewInspectorCertificates(${inspector.inspectorNumber})">Certificates</button>
+                        <td>${inspector.certificates ? inspector.certificates.length : 0} certificates</td>
+                        <td>
+                            <button onclick="editInspector(${inspector.inspectorNumber})">Edit</button>
+                            <button onclick="deleteInspector(${inspector.inspectorNumber})">Delete</button>
                         </td>
                     </tr>
                 `).join('')}
@@ -119,155 +140,153 @@ function renderInspectorsTable() {
     document.getElementById('certificateTable').innerHTML = tableHtml;
 }
 
-// Add new inspector
-document.getElementById('addCertificateBtn').addEventListener('click', () => {
+document.getElementById('addCertBtn').addEventListener('click', () => {
     isEditingInspector = false;
-    editingInspectorId = null;
     document.getElementById('formTitle').textContent = 'Add New Inspector';
     document.getElementById('certificateForm').reset();
+
+    // Uncheck all checkboxes and disable expiry fields
+    document.querySelectorAll('.cert-checkbox').forEach(cb => {
+        cb.checked = false;
+        const expiryInput = document.querySelector(`.cert-expiry[data-cert-id="${cb.dataset.certId}"]`);
+        if (expiryInput) {
+            expiryInput.disabled = true;
+            expiryInput.value = '';
+        }
+    });
+
     document.getElementById('certificateModal').style.display = 'block';
 });
 
-// Handle inspector form submission
-document.getElementById('certificateForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    document.getElementById('sbmtbtn').style.display = 'none';
+async function editInspector(inspectorNumber) {
+    const inspector = inspectors.find(i => i.inspectorNumber === inspectorNumber);
+    if (!inspector) return;
 
-    const formData = {
-        inspectorNumber: parseInt(document.getElementById('inspectorNumber').value),
-        fullName: document.getElementById('fullName').value
-    };
-
-    const url = isEditingInspector
-        ? `${API_URL}/api/Inspectors/${editingInspectorId}`
-        : `${API_URL}/api/Inspectors`;
-    const method = isEditingInspector ? 'PUT' : 'POST';
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            'username': username,
-            'password': password
-        },
-        body: JSON.stringify(formData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(() => {
-            fetchInspectors();
-            document.getElementById('certificateModal').style.display = 'none';
-            document.getElementById('sbmtbtn').style.display = 'block';
-            showMessage(isEditingInspector ? 'Inspector updated successfully!' : 'Inspector added successfully!');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('sbmtbtn').style.display = 'block';
-            showMessage('An error occurred. Please try again.', true);
-        });
-});
-
-// Edit inspector
-function editInspector(inspectorNumber) {
     isEditingInspector = true;
-    const inspector = inspectors.find(insp => insp.inspectorNumber === inspectorNumber);
     editingInspectorId = inspectorNumber;
 
     document.getElementById('formTitle').textContent = 'Edit Inspector';
     document.getElementById('inspectorNumber').value = inspector.inspectorNumber;
     document.getElementById('fullName').value = inspector.fullName;
 
+    // Reset all checkboxes first
+    document.querySelectorAll('.cert-checkbox').forEach(cb => {
+        cb.checked = false;
+        const expiryInput = document.querySelector(`.cert-expiry[data-cert-id="${cb.dataset.certId}"]`);
+        if (expiryInput) {
+            expiryInput.disabled = true;
+            expiryInput.value = '';
+        }
+    });
+
+    // Check and populate the inspector's certificates
+    if (inspector.certificates) {
+        inspector.certificates.forEach(cert => {
+            const checkbox = document.querySelector(`.cert-checkbox[data-cert-id="${cert.certificateId}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const expiryInput = document.querySelector(`.cert-expiry[data-cert-id="${cert.certificateId}"]`);
+                if (expiryInput) {
+                    expiryInput.disabled = false;
+                    if (cert.expiryDate) {
+                        expiryInput.value = new Date(cert.expiryDate).toISOString().split('T')[0];
+                    }
+                }
+            }
+        });
+    }
+
     document.getElementById('certificateModal').style.display = 'block';
 }
 
-// Delete inspector
-function deleteInspector(inspectorNumber) {
-    if (confirm('Are you sure you want to delete this inspector?')) {
-        fetch(`${API_URL}/api/Inspectors/${inspectorNumber}`, {
-            method: 'DELETE',
-            headers: {
-                'username': username,
-                'password': password
-            }
-        })
-            .then(response => {
-                if (response.ok) {
-                    fetchInspectors();
-                    showMessage('Inspector deleted successfully!');
-                } else {
-                    throw new Error('Failed to delete inspector');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('An error occurred while deleting the inspector.', true);
-            });
+async function deleteInspector(inspectorNumber) {
+    if (!confirm('Are you sure you want to delete this inspector?')) return;
+
+    try {
+        await axios.delete(`${API_URL}/api/Inspectors/${inspectorNumber}`, {
+            headers: { username, password }
+        });
+        fetchInspectors();
+    } catch (error) {
+        alert('Error deleting inspector');
     }
 }
 
-// View inspector certificates
-function viewInspectorCertificates(inspectorNumber) {
-    // Switch to certificates tab and filter by inspector
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+document.getElementById('certificateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    document.querySelector('[data-tab="certList"]').classList.add('active');
-    document.getElementById('certListTab').classList.add('active');
+    const inspectorNumber = parseInt(document.getElementById('inspectorNumber').value);
+    const fullName = document.getElementById('fullName').value;
 
-    fetchCertificates(inspectorNumber);
-}
+    // Collect selected certificates
+    const certificates = [];
+    document.querySelectorAll('.cert-checkbox:checked').forEach(checkbox => {
+        const expiryInput = document.querySelector(`.cert-expiry[data-cert-id="${checkbox.dataset.certId}"]`);
+        const expiryDate = expiryInput?.value || null;
 
-// ==================== CERTIFICATES TAB ====================
+        certificates.push({
+            certificateId: checkbox.dataset.certId,
+            certificateName: checkbox.dataset.certName,
+            expiryDate: expiryDate
+        });
+    });
 
-// Fetch certificates (optionally filtered by inspector)
-function fetchCertificates(inspectorNumber = null) {
-    const url = inspectorNumber
-        ? `${API_URL}/api/Certificates/inspector/${inspectorNumber}`
-        : `${API_URL}/api/Certificates/all`;
+    const inspectorData = {
+        inspectorNumber,
+        fullName,
+        certificates
+    };
 
-    fetch(url, {
-        headers: {
-            'username': username,
-            'password': password
+    try {
+        if (isEditingInspector) {
+            await axios.put(`${API_URL}/api/Inspectors/${editingInspectorId}`, inspectorData, {
+                headers: { username, password }
+            });
+        } else {
+            await axios.post(`${API_URL}/api/Inspectors`, inspectorData, {
+                headers: { username, password }
+            });
         }
-    })
-        .then(response => response.json())
-        .then(data => {
-            certificatesList = data;
-            renderCertificatesTable();
-        })
-        .catch(error => console.error('Error:', error));
+        document.getElementById('certificateModal').style.display = 'none';
+        fetchInspectors();
+    } catch (error) {
+        alert('Error saving inspector: ' + (error.response?.data?.message || error.message));
+    }
+});
+
+// ============= CERTIFICATE TYPES MANAGEMENT =============
+async function fetchCertificateTypes() {
+    try {
+        const response = await axios.get(`${API_URL}/api/Certificates/all`, {
+            headers: { username, password }
+        });
+        masterCertificates = response.data;
+        renderCertificateTypesTable();
+    } catch (error) {
+        console.error('Error fetching certificate types:', error);
+    }
 }
 
-// Render certificates table
-function renderCertificatesTable() {
-    const formatDate = (date) => date ? new Date(date).toLocaleDateString() : 'No expiry';
-
+function renderCertificateTypesTable() {
     const tableHtml = `
         <table>
             <thead>
                 <tr>
-                    <th>Certificate Number</th>
-                    <th>Inspector Number</th>
                     <th>Certificate Name</th>
-                    <th>Expiry Date</th>
+                    <th>Code</th>
+                    <th>Active</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                ${certificatesList.map(cert => `
+                ${masterCertificates.map(cert => `
                     <tr>
-                        <td>${cert.certificateNumber}</td>
-                        <td>${cert.inspectorNumber}</td>
                         <td>${cert.certificateName}</td>
-                        <td>${formatDate(cert.expiryDate)}</td>
-                        <td class="action-buttons">
-                            <button class="edit-btn" onclick="editCertificate('${cert.certificateNumber}')">Edit</button>
-                            <button class="delete-btn" onclick="deleteCertificate('${cert.certificateNumber}')">Delete</button>
+                        <td>${cert.certificateCode}</td>
+                        <td>${cert.isActive ? '✓' : '✗'}</td>
+                        <td>
+                            <button onclick="editCertificateType('${cert.id}')">Edit</button>
+                            <button onclick="deleteCertificateType('${cert.id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('')}
@@ -277,161 +296,104 @@ function renderCertificatesTable() {
     document.getElementById('certificateListTable').innerHTML = tableHtml;
 }
 
-// Add new certificate
 document.getElementById('addNewCertificateBtn').addEventListener('click', () => {
     isEditingCertificate = false;
-    editingCertificateNumber = null;
-    document.getElementById('newCertFormTitle').textContent = 'Add New Certificate';
+    document.getElementById('newCertFormTitle').textContent = 'Add Certificate Type';
     document.getElementById('newCertificateForm').reset();
+    document.getElementById('certActive').checked = true;
     document.getElementById('newCertificateModal').style.display = 'block';
 });
 
-// Handle certificate form submission
-document.getElementById('newCertificateForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    document.getElementById('certSbmtBtn').style.display = 'none';
+async function editCertificateType(certId) {
+    const cert = masterCertificates.find(c => c.id === certId);
+    if (!cert) return;
 
-    const formData = {
-        certificateNumber: document.getElementById('certNumber').value,
-        inspectorNumber: parseInt(document.getElementById('certInspectorNumber').value),
-        certificateName: document.getElementById('certName').value,
-        expiryDate: document.getElementById('certExpiryDate').value
-    };
-
-    const url = isEditingCertificate
-        ? `${API_URL}/api/Certificates/${editingCertificateNumber}`
-        : `${API_URL}/api/Certificates`;
-    const method = isEditingCertificate ? 'PUT' : 'POST';
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            'username': username,
-            'password': password
-        },
-        body: JSON.stringify(formData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(() => {
-            fetchCertificates();
-            document.getElementById('newCertificateModal').style.display = 'none';
-            document.getElementById('certSbmtBtn').style.display = 'block';
-            showMessage(isEditingCertificate ? 'Certificate updated successfully!' : 'Certificate added successfully!');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('certSbmtBtn').style.display = 'block';
-            showMessage('An error occurred. Please try again.', true);
-        });
-});
-
-// Edit certificate
-function editCertificate(certificateNumber) {
     isEditingCertificate = true;
-    const cert = certificatesList.find(c => c.certificateNumber === certificateNumber);
-    editingCertificateNumber = certificateNumber;
+    editingCertificateId = certId;
 
-    document.getElementById('newCertFormTitle').textContent = 'Edit Certificate';
-    document.getElementById('certNumber').value = cert.certificateNumber;
-    document.getElementById('certInspectorNumber').value = cert.inspectorNumber;
+    document.getElementById('newCertFormTitle').textContent = 'Edit Certificate Type';
     document.getElementById('certName').value = cert.certificateName;
-    document.getElementById('certExpiryDate').value = cert.expiryDate ? new Date(cert.expiryDate).toISOString().split('T')[0] : '';
+    document.getElementById('certCode').value = cert.certificateCode;
+    document.getElementById('certDescription').value = cert.description || '';
+    document.getElementById('certActive').checked = cert.isActive;
 
     document.getElementById('newCertificateModal').style.display = 'block';
 }
 
-// Delete certificate
-function deleteCertificate(certificateNumber) {
-    if (confirm('Are you sure you want to delete this certificate?')) {
-        fetch(`${API_URL}/api/Certificates/${certificateNumber}`, {
-            method: 'DELETE',
-            headers: {
-                'username': username,
-                'password': password
-            }
-        })
-            .then(response => {
-                if (response.ok) {
-                    fetchCertificates();
-                    showMessage('Certificate deleted successfully!');
-                } else {
-                    throw new Error('Failed to delete certificate');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('An error occurred while deleting the certificate.', true);
-            });
+async function deleteCertificateType(certId) {
+    if (!confirm('Are you sure you want to delete this certificate type?')) return;
+
+    try {
+        await axios.delete(`${API_URL}/api/Certificates/${certId}`, {
+            headers: { username, password }
+        });
+        fetchCertificateTypes();
+        loadMasterCertificates(); // Refresh checkboxes
+    } catch (error) {
+        alert('Error deleting certificate type');
     }
 }
 
-// ==================== TAB NAVIGATION ====================
+document.getElementById('newCertificateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Remove active class from all buttons and tabs
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    const certData = {
+        certificateName: document.getElementById('certName').value,
+        certificateCode: document.getElementById('certCode').value,
+        description: document.getElementById('certDescription').value || null,
+        isActive: document.getElementById('certActive').checked
+    };
 
-        // Add active class to clicked button and corresponding tab
-        btn.classList.add('active');
-        document.getElementById(`${btn.dataset.tab}Tab`).classList.add('active');
-
-        // Fetch data for the selected tab
-        if (btn.dataset.tab === 'courses') {
-            fetchCourses();
-        } else if (btn.dataset.tab === 'certList') {
-            fetchCertificates();
+    try {
+        if (isEditingCertificate) {
+            certData.id = editingCertificateId;
+            await axios.put(`${API_URL}/api/Certificates/${editingCertificateId}`, certData, {
+                headers: { username, password }
+            });
+        } else {
+            await axios.post(`${API_URL}/api/Certificates`, certData, {
+                headers: { username, password }
+            });
         }
-    });
+        document.getElementById('newCertificateModal').style.display = 'none';
+        fetchCertificateTypes();
+        loadMasterCertificates(); // Refresh checkboxes
+    } catch (error) {
+        alert('Error saving certificate type: ' + (error.response?.data?.message || error.message));
+    }
 });
 
-// ==================== COURSES TAB (unchanged) ====================
-
-// Fetch Courses
-function fetchCourses() {
-    fetch(`${API_URL}/api/Certificate/all`, {
-        headers: {
-            'username': username,
-            'password': password
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            courses = data;
-            renderCoursesTable();
-        })
-        .catch(error => console.error('Error:', error));
+// ============= COURSES (Keep existing logic) =============
+async function fetchCourses() {
+    try {
+        const response = await axios.get(`${API_URL}/api/Certificate/AllCourses`, {
+            headers: { username, password }
+        });
+        courses = response.data;
+        renderCoursesTable();
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+    }
 }
 
-// Render Courses Table
 function renderCoursesTable() {
     const tableHtml = `
         <table>
             <thead>
                 <tr>
-                    <th>Certificate ID</th>
-                    <th>Name</th>
                     <th>Course Title</th>
+                    <th>Inspector #</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 ${courses.map(course => `
                     <tr>
+                        <td>${course.courseTitle}</td>
                         <td>${course.certificateID}</td>
-                        <td>${course.name || 'N/A'}</td>
-                        <td>${course.courseTitle || 'N/A'}</td>
-                        <td class="action-buttons">
-                            <button class="edit-btn" onclick="editCourse(${course.certificateID})">Edit</button>
-                            <button class="delete-btn" onclick="deleteCourse(${course.certificateID})">Delete</button>
-                            <button class="details-btn" onclick="showCourseDetails(${course.certificateID})">Details</button>
+                        <td>
+                            <button onclick="editCourse('${course.id}')">Edit</button>
+                            <button onclick="deleteCourse('${course.id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('')}
@@ -441,139 +403,101 @@ function renderCoursesTable() {
     document.getElementById('courseTable').innerHTML = tableHtml;
 }
 
-// Add New Course Button
 document.getElementById('addCourseBtn').addEventListener('click', () => {
     isEditingCourse = false;
-    editingCourseId = null;
     document.getElementById('courseFormTitle').textContent = 'Add New Course';
     document.getElementById('courseForm').reset();
     document.getElementById('courseModal').style.display = 'block';
 });
 
-// Course Form Submission
-document.getElementById('courseForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    document.getElementById('courseSbmtBtn').style.display = 'none';
+async function editCourse(courseId) {
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
 
-    const formData = {
-        certificateID: parseInt(document.getElementById('certificateID').value),
-        name: document.getElementById('courseName').value,
-        courseTitle: document.getElementById('courseTitle').value
-    };
-
-    const url = isEditingCourse
-        ? `${API_URL}/api/Certificate/${editingCourseId}`
-        : `${API_URL}/api/Certificate`;
-    const method = isEditingCourse ? 'PUT' : 'POST';
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            'username': username,
-            'password': password
-        },
-        body: JSON.stringify(formData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(() => {
-            fetchCourses();
-            document.getElementById('courseModal').style.display = 'none';
-            document.getElementById('courseSbmtBtn').style.display = 'block';
-            showMessage(isEditingCourse ? 'Course updated successfully!' : 'Course added successfully!');
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('courseSbmtBtn').style.display = 'block';
-            showMessage('An error occurred. Please try again.', true);
-        });
-});
-
-// Edit Course
-function editCourse(id) {
     isEditingCourse = true;
-    editingCourseId = id;
-    const course = courses.find(c => c.certificateID === id);
+    editingCourseId = courseId;
 
     document.getElementById('courseFormTitle').textContent = 'Edit Course';
+    document.getElementById('courseTitle').value = course.courseTitle;
     document.getElementById('certificateID').value = course.certificateID;
-    document.getElementById('courseName').value = course.name || '';
-    document.getElementById('courseTitle').value = course.courseTitle || '';
 
     document.getElementById('courseModal').style.display = 'block';
 }
 
-// Delete Course
-function deleteCourse(id) {
-    if (confirm('Are you sure you want to delete this course?')) {
-        fetch(`${API_URL}/api/Certificate/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'username': username,
-                'password': password
-            }
-        })
-            .then(response => {
-                if (response.ok) {
-                    fetchCourses();
-                    showMessage('Course deleted successfully!');
-                } else {
-                    throw new Error('Failed to delete course');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('An error occurred while deleting the course.', true);
+async function deleteCourse(courseId) {
+    if (!confirm('Are you sure you want to delete this course?')) return;
+
+    try {
+        await axios.delete(`${API_URL}/api/Certificate/${courseId}`, {
+            headers: { username, password }
+        });
+        fetchCourses();
+    } catch (error) {
+        alert('Error deleting course');
+    }
+}
+
+document.getElementById('courseForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const courseData = {
+        courseTitle: document.getElementById('courseTitle').value,
+        certificateID: parseInt(document.getElementById('certificateID').value)
+    };
+
+    try {
+        if (isEditingCourse) {
+            await axios.put(`${API_URL}/api/Certificate/${editingCourseId}`, courseData, {
+                headers: { username, password }
             });
-    }
-}
-
-// Show Course Details
-function showCourseDetails(id) {
-    const course = courses.find(c => c.certificateID === id);
-
-    const detailsHtml = `
-        <p><strong>Certificate ID:</strong> ${course.certificateID}</p>
-        <p><strong>Name:</strong> ${course.name || 'N/A'}</p>
-        <p><strong>Course Title:</strong> ${course.courseTitle || 'N/A'}</p>
-    `;
-    document.getElementById('courseDetails').innerHTML = detailsHtml;
-    document.getElementById('courseDetailsModal').style.display = 'block';
-}
-
-// ==================== UTILITY FUNCTIONS ====================
-
-// Show message function
-function showMessage(message, isError = false) {
-    const messageElement = document.createElement('div');
-    messageElement.textContent = message;
-    messageElement.className = isError ? 'error-message' : 'success-message';
-    document.querySelector('.container').insertAdjacentElement('afterbegin', messageElement);
-    setTimeout(() => messageElement.remove(), 3000);
-}
-
-// Modal control
-const modals = document.getElementsByClassName('modal');
-const closeButtons = document.getElementsByClassName('close');
-
-for (let i = 0; i < closeButtons.length; i++) {
-    closeButtons[i].onclick = function () {
-        modals[i].style.display = 'none';
-    }
-}
-
-window.onclick = function (event) {
-    for (let i = 0; i < modals.length; i++) {
-        if (event.target == modals[i]) {
-            modals[i].style.display = 'none';
+        } else {
+            await axios.post(`${API_URL}/api/Certificate`, courseData, {
+                headers: { username, password }
+            });
         }
+        document.getElementById('courseModal').style.display = 'none';
+        fetchCourses();
+    } catch (error) {
+        alert('Error saving course');
+    }
+});
+
+// ============= TAB NAVIGATION =============
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+
+    if (tabName === 'inspectors') {
+        document.getElementById('certificatesTab').classList.add('active');
+        document.querySelector('[data-tab="inspectors"]').classList.add('active');
+        fetchInspectors();
+    } else if (tabName === 'certificateTypes') {
+        document.getElementById('certListTab').classList.add('active');
+        document.querySelector('[data-tab="certificateTypes"]').classList.add('active');
+        fetchCertificateTypes();
+    } else if (tabName === 'courses') {
+        document.getElementById('coursesTab').classList.add('active');
+        document.querySelector('[data-tab="courses"]').classList.add('active');
+        fetchCourses();
     }
 }
 
-// Initial check for login status
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', () => showTab(button.dataset.tab));
+});
+
+// ============= MODAL CLOSE =============
+document.querySelectorAll('.close').forEach(closeBtn => {
+    closeBtn.addEventListener('click', function () {
+        this.closest('.modal').style.display = 'none';
+    });
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
+
+// ============= INIT =============
 checkLoginStatus();
