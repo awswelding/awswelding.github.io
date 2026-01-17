@@ -4712,13 +4712,12 @@
 			}
 
 			try {
-				// Fetch inspector data
+				// Fetch inspector data (includes embedded certificates)
 				const inspectorResponse = await axios.get(`https://awswelding.runasp.net/api/Inspectors/inspector/${inspectorNumber}`);
 				const inspector = inspectorResponse.data;
-
-				// Fetch certificates for this inspector
-				const certResponse = await axios.get(`https://awswelding.runasp.net/api/Certificates/inspector/${inspectorNumber}`);
-				const certificates = certResponse.data;
+				
+				// Use embedded certificates
+				const certificates = inspector.certificates || [];
 
 				// Display basic information
 				document.getElementById('inspectorNumberResult').textContent = inspector.inspectorNumber;
