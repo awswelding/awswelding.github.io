@@ -140,7 +140,7 @@ function renderInspectorsTable() {
     document.getElementById('certificateTable').innerHTML = tableHtml;
 }
 
-document.getElementById('addCertBtn').addEventListener('click', () => {
+document.getElementById('addCertificateBtn').addEventListener('click', () => {
     isEditingInspector = false;
     document.getElementById('formTitle').textContent = 'Add New Inspector';
     document.getElementById('certificateForm').reset();
@@ -366,7 +366,7 @@ document.getElementById('newCertificateForm').addEventListener('submit', async (
 // ============= COURSES (Keep existing logic) =============
 async function fetchCourses() {
     try {
-        const response = await axios.get(`${API_URL}/api/Certificate/AllCourses`, {
+        const response = await axios.get(`${API_URL}/api/Certificate/all`, {
             headers: { username, password }
         });
         courses = response.data;
@@ -392,8 +392,8 @@ function renderCoursesTable() {
                         <td>${course.courseTitle}</td>
                         <td>${course.certificateID}</td>
                         <td>
-                            <button onclick="editCourse('${course.id}')">Edit</button>
-                            <button onclick="deleteCourse('${course.id}')">Delete</button>
+                            <button onclick="editCourse(${course.certificateID})">Edit</button>
+                            <button onclick="deleteCourse(${course.certificateID})">Delete</button>
                         </td>
                     </tr>
                 `).join('')}
@@ -410,12 +410,12 @@ document.getElementById('addCourseBtn').addEventListener('click', () => {
     document.getElementById('courseModal').style.display = 'block';
 });
 
-async function editCourse(courseId) {
-    const course = courses.find(c => c.id === courseId);
+async function editCourse(certId) {
+    const course = courses.find(c => c.certificateID === certId);
     if (!course) return;
 
     isEditingCourse = true;
-    editingCourseId = courseId;
+    editingCourseId = certId;
 
     document.getElementById('courseFormTitle').textContent = 'Edit Course';
     document.getElementById('courseTitle').value = course.courseTitle;
@@ -465,15 +465,15 @@ document.getElementById('courseForm').addEventListener('submit', async (e) => {
 // ============= TAB NAVIGATION =============
 function showTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    if (tabName === 'inspectors') {
+    if (tabName === 'certificates') {
         document.getElementById('certificatesTab').classList.add('active');
-        document.querySelector('[data-tab="inspectors"]').classList.add('active');
+        document.querySelector('[data-tab="certificates"]').classList.add('active');
         fetchInspectors();
-    } else if (tabName === 'certificateTypes') {
+    } else if (tabName === 'certList') {
         document.getElementById('certListTab').classList.add('active');
-        document.querySelector('[data-tab="certificateTypes"]').classList.add('active');
+        document.querySelector('[data-tab="certList"]').classList.add('active');
         fetchCertificateTypes();
     } else if (tabName === 'courses') {
         document.getElementById('coursesTab').classList.add('active');
@@ -482,7 +482,7 @@ function showTab(tabName) {
     }
 }
 
-document.querySelectorAll('.tab-button').forEach(button => {
+document.querySelectorAll('.tab-btn').forEach(button => {
     button.addEventListener('click', () => showTab(button.dataset.tab));
 });
 
