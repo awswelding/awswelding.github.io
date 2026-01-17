@@ -215,7 +215,7 @@ async function deleteInspector(inspectorNumber) {
 document.getElementById('certificateForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const inspectorNumber = parseInt(document.getElementById('inspectorNumber').value);
+    const inspectorNumber = document.getElementById('inspectorNumber').value;
     const fullName = document.getElementById('fullName').value;
 
     // Collect selected certificates
